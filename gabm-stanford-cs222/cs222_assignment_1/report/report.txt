@@ -1,0 +1,15 @@
+Name: Mateo Larrea
+SU ID: 06761787
+
+Questions:
+
+Was it retrieving the right information?
+Yes, the retrieval function retrieves semantically relevant information by comparing vector embeddings and assigning importance scores based on the content's relevance to the query.
+
+What distinguishes the memories that are considered "important" versus not?
+Important memories are distinguished by their relevance to the query, as well as GPT-assigned importance scores that evaluate significance and overall impact.
+
+Response:
+The retrieval function successfully retrieves relevant information by comparing vector embeddings between the query and stored memories. It uses cosine similarity to rank how closely aligned each memory is with the query. In addition to semantic similarity, the function relies on GPT-generated importance scores to further refine results. These scores are based on criteria like relevance, significance, and overall impact, as defined in the importance score templates. This combination ensures that the function retrieves information conceptually relevant to the question, such as business decisions, political beliefs, or personal challenges.
+
+What distinguishes important memories is their relevance to the query and the importance scores provided by GPT. The templates used to assign these scores prompt the model to evaluate the significance of each memory within its context. This means that memories like pivotal business decisions or personal milestones are rated higher than routine activities, even if they are both relevant. However, while the current system captures relevance and general importance, it does not explicitly factor in emotional impact. The system could be further enhanced by introducing a mechanism that weighs memories based on their emotional or life-changing significance, alongside the current relevance-based approach.

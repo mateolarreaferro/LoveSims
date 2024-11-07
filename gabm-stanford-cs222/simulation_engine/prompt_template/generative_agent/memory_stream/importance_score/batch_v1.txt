@@ -1,0 +1,20 @@
+[Input]
+The following is a list of numbered observations. Each observation represents a piece of information that the AI needs to evaluate for its importance within a certain context. The goal is to provide an importance score between 0 and 100 for each observation, where 0 means the observation is not important, and 100 means the observation is extremely important. Consider the relevance, significance, and the overall impact of each observation when assigning the importance score.
+
+Observations:
+!<INPUT 0>! (Provide a numbered list of observations)
+
+[Output]
+Return the scores as a JSON object in the following format:
+{
+  "Item 1": <int importance score for item 1>,
+  "Item 2": <int importance score for item 2>,
+  ...
+}
+
+For example:
+{
+  "Item 1": 85,
+  "Item 2": 42,
+  "Item 3": 95
+}

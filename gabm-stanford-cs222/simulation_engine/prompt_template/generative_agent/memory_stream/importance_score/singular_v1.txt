@@ -1,0 +1,16 @@
+[Input]
+The following is a single observation. The AI needs to evaluate the importance of this observation and provide an importance score between 0 and 100, where 0 means the observation is not important, and 100 means the observation is extremely important. Consider the relevance, significance, and overall impact of the observation when assigning the importance score.
+
+Observation:
+!<INPUT 0>! (Provide the observation here)
+
+[Output]
+Return the score as a JSON object in the following format:
+{
+  "Item 1": <int importance score>
+}
+
+For example:
+{
+  "Item 1": 93
+}
