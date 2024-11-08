@@ -13,39 +13,39 @@ class Agent:
 
 class Game:
     def __init__(self, user_agent, agents):
-        self.user_agent = Agent(user_agent["name"], user_agent["persona"])  # Convert to Agent object
-        self.agents = agents  # Other agents for individual dates
-        self.date_context = ""  # Context for the date, set by the user
-        self.date_logs = []  # Log of each date interaction
+        self.user_agent = Agent(user_agent["name"], user_agent["persona"])
+        self.agents = agents
+        self.date_context = ""
+        self.date_logs = []
 
     def set_date_context(self, context):
         self.date_context = context
         print(f"Date context set to: {self.date_context}")
 
-    def run_date(self, agent, rounds=5):
+    def run_date(self, agent, responses=5):
         """
-        Conducts a multi-round conversation between the user agent (Joon) and a date agent.
+        Conducts a multi-response conversation between the user agent (Joon) and a date agent.
 
         Args:
         - agent: The agent for the date.
-        - rounds: Number of conversational exchanges in the date.
+        - responses: Number of conversational exchanges in the date.
         """
         print(f"Starting date with {agent.name}")
         conversation_context = f"You are on a {self.date_context}. You are dating {agent.name}."
         system_prompt_user = self._create_date_prompt(self.user_agent, agent)
         system_prompt_agent = self._create_date_prompt(agent, self.user_agent)
 
-        for i in range(rounds):
+        for i in range(responses):
             # Joon's message (user agent's perspective)
-            user_message = f"(Round {i+1}) Describe your interaction on this date: {self.date_context}"
+            user_message = f"(Response {i+1}) Describe your interaction on this date: {self.date_context}"
             user_response = self.generate_response(system_prompt_user, conversation_context + f"\n{self.user_agent.name}: {user_message}")
-            print(f"{self.user_agent.name} (Round {i+1}): {user_response}")
+            print(f"{self.user_agent.name} (Response {i+1}): {user_response}")
             self.log_date(agent, f"{self.user_agent.name}: {user_response}", i+1)
             conversation_context += f"\n{self.user_agent.name}: {user_response}"
 
             # Date agent's response
             agent_response = self.generate_response(system_prompt_agent, conversation_context)
-            print(f"{agent.name} (Round {i+1}): {agent_response}")
+            print(f"{agent.name} (Response {i+1}): {agent_response}")
             self.log_date(agent, f"{agent.name}: {agent_response}", i+1)
             conversation_context += f"\n{agent.name}: {agent_response}"
 
@@ -67,15 +67,14 @@ class Game:
         Context: {self.date_context}.
         """
     
-    def log_date(self, agent, response, round_number):
-        log_entry = f"Date with {agent.name} - Round {round_number}:\n{response}\n"
+    def log_date(self, agent, response, response_number):
+        log_entry = f"Date with {agent.name} - Response {response_number}:\n{response}\n"
         self.date_logs.append(log_entry)
 
     def get_log(self):
         return "\n".join(self.date_logs)
 
 def init_game(user_agent_name, date_context):
-    # Initialize the selected user agent and other agents for dates
     user_agent = next(agent for agent in agent_list if agent["name"] == user_agent_name)
     other_agents = [Agent(agent_data["name"], agent_data["persona"]) for agent_data in agent_list if agent_data["name"] != user_agent_name]
     game = Game(user_agent, other_agents)
@@ -97,7 +96,6 @@ def start_dates():
     user_agent_name = data['name']
     date_context = data['context']
     
-    # Initialize the game with selected agent and date context
     game = init_game(user_agent_name, date_context)
     print(f"Game initialized with agent: {user_agent_name} and context: {date_context}")
     return jsonify({"status": "success"})
@@ -110,12 +108,10 @@ def run_dates():
         return jsonify({"error": "No game initialized"}), 400
 
     print("Running dates with each agent")
-    # Run dates with all agents and generate interaction logs with multiple rounds
     for agent in game.agents:
         print(f"Running date with {agent.name}")
-        game.run_date(agent, rounds=5)  # Set rounds to define length of interaction
+        game.run_date(agent, responses=5)  # Set responses to define length of interaction
 
-    # Return full date logs
     print("Returning date logs")
     return jsonify({"date_logs": game.get_log()})
 
