@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>multi-agent</title>
+  <title>Multi-Agent Dating Simulation</title>
   <script src="https://unpkg.com/@popperjs/core@2"></script>
   <script src="https://unpkg.com/tippy.js@6"></script>
   <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css"/>
@@ -36,34 +36,11 @@
       padding: 20px;
       padding-top: 40px;
     }
-    .agent-row {
-      max-width: 600px;
-      margin: 0 auto 20px;
-      padding-bottom: 20px;
-    }
-    .message-container {
-      position: relative;
-      margin-bottom: 20px;
-    }
-    .agent-name {
-      font-weight: bold;
-      margin-bottom: 5px;
-      color: #777;
-    }
-    .message-group {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    .message-group.user-agent {
-      align-items: flex-end;
-    }
     .message {
       max-width: 70%;
       padding: 8px 12px;
       margin: 2px 0;
       border-radius: 18px;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       font-size: 14px;
       line-height: 1.4;
     }
@@ -75,20 +52,13 @@
       background-color: #e5e5ea;
       color: #000000;
     }
-    /* Remove special formatting for first and last bubbles */
-    
-    .user-agent .agent-name {
-      text-align: right;
-    }
-    h1 {
-      color: var(--secondary-color);
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .controls {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 20px;
+    .start-page {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     button {
       font-size: 14px;
@@ -108,301 +78,80 @@
       background-color: var(--border-color);
       cursor: not-allowed;
     }
-    .tippy-box[data-theme~='custom'] {
-      background-color: white;
-      color: var(--text-color);
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    .game-layout {
-      display: flex;
-      gap: 20px;
-    }
-    .messages-column {
-      flex: 3;
-    }
-    .votes-column {
-      flex: 1;
-      background-color: #f0f0f0;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    .vote-item {
-      margin-bottom: 10px;
-    }
-    .start-page {
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 20px;
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-    }
-    .form-group input, .form-group textarea {
-      width: calc(100% - 16px); 
-      padding: 8px;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      box-sizing: border-box; 
-    }
-    .input-with-prefix {
-      display: flex;
-      flex-direction: column;
-      background-color: white;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-    }
-
-    .input-prefix {
-      padding: 8px;
-      background-color: white;
-      border-bottom: 1px solid var(--border-color);
-      border-radius: 4px 4px 0 0;
-    }
-
-    .input-with-prefix textarea {
-      flex-grow: 1;
-      border: none;
-      border-radius: 0 0 4px 4px;
-      padding: 8px;
-      min-height: 80px; 
-      resize: none; 
-    }
-
-    .input-with-prefix textarea::placeholder {
-      color: #999;
-    }
-
-    .spinner {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(0, 0, 0, 0.1);
-      border-radius: 50%;
-      border-top-color: var(--primary-color);
-      animation: spin 1s ease-in-out infinite;
-      margin-left: 10px;
-      vertical-align: middle;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>multi-agent</h1>
+    <h1>Multi-Agent Dating Simulation</h1>
     <div id="start-page" class="start-page">
       <div class="form-group">
-        <label for="num-rounds">Number of rounds:</label>
-        <input type="number" id="num-rounds" min="1" value="3" style="width: 50px;">
+        <label for="agent-name">Select Your Agent:</label>
+        <select id="agent-name" required>
+          <!-- Options for agent names will be populated here -->
+        </select>
       </div>
       <div class="form-group">
-        <label for="agent-name">Your agent's name:</label>
-        <input type="text" id="agent-name" required>
+        <label for="date-context">Describe the Date Context:</label>
+        <textarea id="date-context" placeholder="e.g., first date at a coffee shop" rows="4" required></textarea>
       </div>
-      <div class="form-group">
-        <label for="agent-persona">Your agent's persona:</label>
-        <div class="input-with-prefix">
-          <span class="input-prefix">You are...</span>
-          <textarea id="agent-persona" rows="8" required placeholder="a PhD student at Stanford University. You're interested in AI agents and simulation, and you're currently working on homework for CS 222. In your free time, you like to draw and play board games. You have two cute hamsters, Adobo and Bingus. In the past week, you've gone to the arcade three times to play Dance Dance Revolution. You dislike when tourists at the Oval take pictures of you riding your bike."></textarea>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="position">Position:</label>
-        <input type="text" id="position" placeholder="group leader" required>
-      </div>
-      <button id="start-game">Start</button>
+      <button id="start-dates">Start Dates</button>
     </div>
     <div id="game-page" style="display: none;">
       <div class="controls">
-        <button id="next-round" disabled>Next Round</button>
         <button id="reset-game">Reset</button>
         <button id="download-log" style="display: none;">Download Log</button>
       </div>
-      <div id="round-info-container">
-        <span id="round-info"></span>
-        <div id="loading-spinner" class="spinner" style="display: none;"></div>
-      </div>
-    </div>
-  </div>
-  <div id="game-layout" class="game-layout" style="display: none;">
-    <div id="game-container" class="game-container messages-column"></div>
-    <div class="container">
-      <div id="votes-container" class="votes-column" style="display: none;">
-        <h3>Votes</h3>
-        <div id="votes-list"></div>
-      </div>
+      <div id="date-log-container" class="game-container"></div>
     </div>
   </div>
 
   <script>
     const startPage = document.getElementById('start-page');
     const gamePage = document.getElementById('game-page');
-    const gameLayout = document.getElementById('game-layout');
-    const numRoundsInput = document.getElementById('num-rounds');
-    const agentNameInput = document.getElementById('agent-name');
-    const agentPersonaInput = document.getElementById('agent-persona');
-    const startGameBtn = document.getElementById('start-game');
-    const nextRoundBtn = document.getElementById('next-round');
+    const dateLogContainer = document.getElementById('date-log-container');
+    const startDatesBtn = document.getElementById('start-dates');
     const resetGameBtn = document.getElementById('reset-game');
-    const roundInfo = document.getElementById('round-info');
-    const gameContainer = document.getElementById('game-container');
-    const loadingSpinner = document.getElementById('loading-spinner');
     const downloadLogBtn = document.getElementById('download-log');
-    const positionInput = document.getElementById('position');
+    const agentNameSelect = document.getElementById('agent-name');
+    const dateContextInput = document.getElementById('date-context');
 
-    let currentRound = 0;
-    let totalRounds = 3;
-    let currentAgentIndex = 0;
-    let roundData = [];
-    let userAgentName = '';
+    // Populate agent names in the select element
+    const agentList = ["Joon", "Carolyn", "Helena", "Michael", "Percy"];
+    agentList.forEach(agent => {
+      const option = document.createElement('option');
+      option.value = agent;
+      option.textContent = agent;
+      agentNameSelect.appendChild(option);
+    });
 
-    function createThoughtsContent(data) {
-      if (data.introduction) {
-        return `
-          <h4>Introduction strategy:</h4>
-          <p>${data.introduction}</p>
-        `;
-      } else {
-        return `
-          <h4>Reflection:</h4>
-          <p>${data.reflection}</p>
-          <h4>Strategy:</h4>
-          <p>${data.plan}</p>
-        `;
-      }
-    }
-
-    function updateRoundInfo() {
-      if (currentRound === totalRounds) {
-        roundInfo.textContent = "Voting in progress";
-      } else {
-        roundInfo.textContent = `Round ${currentRound} of ${totalRounds - 1}`;
-      }
-    }
-
-    function displayVotes(votes) {
-      const votesList = document.getElementById('votes-list');
-      votesList.innerHTML = '';
-      votes.forEach(vote => {
-        const voteItem = document.createElement('div');
-        voteItem.className = 'vote-item';
-        voteItem.textContent = `${vote[0]} voted for ${vote[1]}`;
-        votesList.appendChild(voteItem);
+    function displayDateLog(dateLogs) {
+      console.log("Displaying date logs...");
+      dateLogContainer.innerHTML = '';
+      dateLogs.split('\n').forEach(log => {
+        const logEntry = document.createElement('div');
+        logEntry.className = 'message other-agent';
+        logEntry.textContent = log;
+        dateLogContainer.appendChild(logEntry);
       });
-      document.getElementById('votes-container').style.display = 'block';
+      dateLogContainer.scrollTop = dateLogContainer.scrollHeight;
     }
 
-    function displayMessage(agentData) {
-      const agentRow = document.createElement('div');
-      agentRow.className = 'agent-row';
-      
-      const isUserAgent = agentData.name === userAgentName;
-      const messageClass = isUserAgent ? 'user-agent' : 'other-agent';
-      
-      const sentences = agentData.message.split(/(?<=[.!?])\s+/);
-      const messageGroup = document.createElement('div');
-      messageGroup.className = `message-group ${messageClass}`;
-      
-      for (let i = 0; i < sentences.length; i += 2) {
-        const messageBubble = document.createElement('div');
-        messageBubble.className = `message ${messageClass}`;
-        if (i + 1 < sentences.length) {
-          messageBubble.textContent = sentences[i].trim() + ' ' + sentences[i + 1].trim();
-        } else {
-          messageBubble.textContent = sentences[i].trim();
-        }
-        messageGroup.appendChild(messageBubble);
-      }
-      
-      agentRow.innerHTML = `
-        <div class="message-container ${messageClass}">
-          <div class="agent-name">${agentData.name}</div>
-        </div>
-      `;
-      
-      agentRow.querySelector('.message-container').appendChild(messageGroup);
-      
-      gameContainer.appendChild(agentRow);
-      gameContainer.scrollTop = gameContainer.scrollHeight;
+    startDatesBtn.addEventListener('click', () => {
+      const userAgentName = agentNameSelect.value;
+      const dateContext = dateContextInput.value.trim();
 
-      tippy(messageGroup, {
-        content: createThoughtsContent(agentData),
-        theme: 'custom',
-        placement: 'left-start',
-        allowHTML: true,
-        interactive: true,
-        maxWidth: 300,
-      });
-    }
-
-    function showLoadingSpinner() {
-      loadingSpinner.style.display = 'inline-block';
-    }
-
-    function hideLoadingSpinner() {
-      loadingSpinner.style.display = 'none';
-    }
-
-    function startRound() {
-      showLoadingSpinner();
-      fetchNextAgent();
-    }
-
-    function fetchNextAgent() {
-      fetch('/next_agent', { 
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify({ current_round: currentRound, total_rounds: totalRounds }) 
-      })
-      .then(response => response.json())
-      .then(data => {
-        hideLoadingSpinner();
-        if (data.finished) {
-          displayVotes(data.votes);
-          gameContainer.innerHTML += `<p>Game finished. The winner is ${data.winner}. Press "Reset Game" to start over.</p>`;
-          downloadLogBtn.style.display = 'inline-block';
-        } else {
-          displayMessage(data.agent_data);
-          if (data.round_finished) {
-            currentRound = data.current_round;
-            updateRoundInfo();
-          }
-          showLoadingSpinner();
-          setTimeout(fetchNextAgent, 500); // short delay before fetching next agent
-        }
-      });
-    }
-
-    startGameBtn.addEventListener('click', () => {
-      userAgentName = agentNameInput.value.trim();
-      const userAgentPersona = agentPersonaInput.value.trim();
-      const position = positionInput.value.trim() || 'group leader';
-      
-      if (!userAgentName || userAgentPersona.length === 0) {
-        alert('Please enter both name and persona for your agent.');
+      if (!userAgentName || !dateContext) {
+        alert('Please select an agent and describe the date.');
         return;
       }
 
-      totalRounds = parseInt(numRoundsInput.value) + 1;
-      currentRound = 1;
-
-      fetch('/add_agent', {
+      console.log("Starting dates with selected agent:", userAgentName);
+      fetch('/start_dates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          name: userAgentName, 
-          persona: userAgentPersona,
-          position: position
+        body: JSON.stringify({
+          name: userAgentName,
+          context: dateContext
         })
       })
       .then(response => response.json())
@@ -410,46 +159,46 @@
         if (data.status === 'success') {
           startPage.style.display = 'none';
           gamePage.style.display = 'block';
-          gameLayout.style.display = 'flex';
-          updateRoundInfo();
-          startRound();
+          fetchDates();
         } else {
-          alert('Failed to add agent. Please try again.');
+          alert('Failed to start the simulation. Please try again.');
         }
       });
     });
 
+    function fetchDates() {
+      console.log("Fetching dates...");
+      fetch('/run_dates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log("Received date logs:", data);
+        if (data.date_logs) {
+          displayDateLog(data.date_logs);
+          downloadLogBtn.style.display = 'inline-block';
+        } else {
+          alert('Error fetching date logs.');
+        }
+      })
+      .catch(error => {
+        console.error("Error in fetchDates:", error);
+      });
+    }
+
     resetGameBtn.addEventListener('click', () => {
+      console.log("Resetting game...");
       fetch('/reset', { method: 'POST' })
         .then(response => response.json())
         .then(data => {
           if (data.status === 'reset') {
-            gameContainer.innerHTML = '';
-            document.getElementById('votes-container').style.display = 'none';
-            roundInfo.textContent = '';
-            nextRoundBtn.disabled = true;
+            dateLogContainer.innerHTML = '';
             startPage.style.display = 'block';
             gamePage.style.display = 'none';
-            gameLayout.style.display = 'none';
             downloadLogBtn.style.display = 'none';
-            currentRound = 0;
-            currentAgentIndex = 0;
           }
         });
-    });
-
-    updateRoundInfo();
-
-    agentPersonaInput.addEventListener('focus', function() {
-      if (this.value.trim() === '') {
-        this.placeholder = '';
-      }
-    });
-
-    agentPersonaInput.addEventListener('blur', function() {
-      if (this.value.trim() === '') {
-        this.placeholder = this.getAttribute('placeholder');
-      }
     });
 
     downloadLogBtn.addEventListener('click', () => {
