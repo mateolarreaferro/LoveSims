@@ -2,8 +2,8 @@ import os
 import random
 import io
 from flask import Flask, render_template, jsonify, request, send_file
-from agents import agent_list
-from llm_utils import *
+from agents import agent_list  # Ensure this file exists with proper agent data
+from llm_utils import *  # Ensure llm_utils.py is correctly set up
 
 class Agent:
     def __init__(self, name, persona):
@@ -12,34 +12,34 @@ class Agent:
         self.messages = []
 
 class Game:
-    def __init__(self, user_agent, agents):
+    def __init__(self, user_agent, agents, date_duration=10):
         self.user_agent = Agent(user_agent["name"], user_agent["persona"])
         self.agents = agents
         self.date_context = ""
         self.date_transcript = []
+        self.date_duration = date_duration
 
     def set_date_context(self, context):
         self.date_context = context
         print(f"Date context set to: {self.date_context}")
 
-    def run_date(self, agent, responses=10):
-        """
-        Conducts a multi-response conversation between the user agent and a date agent.
-        """
+    def run_date(self, agent, responses=None):
+        if responses is None:
+            responses = self.date_duration
         print(f"Starting date with {agent.name}")
-        conversation_history = []  # List of messages without speaker names
-        self.log_date(agent, f"Date with {agent.name}:\n", 0)  # Log the start of the date
+        conversation_history = []
+        self.log_date(agent, f"Date with {agent.name}:\n", 0)
 
         for i in range(responses):
             # Determine the stage of the date
-            if i < 2:
+            if i < responses * 0.2:
                 stage = "greeting"
-            elif i < 8:
+            elif i < responses * 0.8:
                 stage = "conversation"
             else:
                 stage = "goodbye"
 
-            # It's the user agent's turn if i % 2 == 0
+            # Decide whose turn it is
             if i % 2 == 0:
                 current_agent = self.user_agent
                 other_agent = agent
@@ -69,8 +69,9 @@ class Game:
         """
         messages = [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": conversation_context},
         ]
+        if conversation_context.strip():
+            messages.append({"role": "user", "content": conversation_context})
         response = gen_oai(messages)
         return response.strip()
 
@@ -95,16 +96,15 @@ class Game:
     def get_log(self):
         return "\n".join(self.date_transcript)
 
-def init_game(user_agent_name, date_context):
+def init_game(user_agent_name, date_context, date_duration):
     user_agent = next(agent for agent in agent_list if agent["name"] == user_agent_name)
     other_agents = [Agent(agent_data["name"], agent_data["persona"]) for agent_data in agent_list if agent_data["name"] != user_agent_name]
-    game = Game(user_agent, other_agents)
+    game = Game(user_agent, other_agents, date_duration)
     game.set_date_context(date_context)
     return game
 
 app = Flask(__name__)
 game = None
-original_agent_count = len(agent_list)
 
 @app.route('/')
 def index():
@@ -116,9 +116,10 @@ def start_dates():
     data = request.json
     user_agent_name = data['name']
     date_context = data['context']
-    
-    game = init_game(user_agent_name, date_context)
-    print(f"Game initialized with agent: {user_agent_name} and context: {date_context}")
+    date_duration = int(data.get('duration', 10))  # Default to 10 if not provided
+
+    game = init_game(user_agent_name, date_context, date_duration)
+    print(f"Game initialized with agent: {user_agent_name}, context: {date_context}, duration: {date_duration}")
     return jsonify({"status": "success"})
 
 @app.route('/run_dates', methods=['POST'])
@@ -131,7 +132,7 @@ def run_dates():
     print("Running dates with each agent")
     for agent in game.agents:
         print(f"Running date with {agent.name}")
-        game.run_date(agent, responses=10)  # Set responses to define length of interaction
+        game.run_date(agent)  # Use the stored duration
 
     print("Returning date transcripts")
     return jsonify({"date_transcript": game.get_log()})

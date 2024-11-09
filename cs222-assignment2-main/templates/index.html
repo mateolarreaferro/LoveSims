@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Multi-Agent Dating Simulation</title>
   <script src="https://unpkg.com/@popperjs/core@2"></script>
   <script src="https://unpkg.com/tippy.js@6"></script>
@@ -39,18 +38,31 @@
     .message {
       max-width: 70%;
       padding: 8px 12px;
-      margin: 2px 0;
+      margin: 5px 0;
       border-radius: 18px;
       font-size: 14px;
       line-height: 1.4;
+      display: flex;
+      flex-direction: column;
+    }
+    .message .sender-name {
+      font-weight: bold;
+      margin-bottom: 2px;
     }
     .message.user-agent {
       background-color: var(--primary-color);
       color: white;
+      align-self: flex-end;
     }
     .message.other-agent {
       background-color: #e5e5ea;
       color: #000000;
+      align-self: flex-start;
+    }
+    .message.date-start {
+      font-weight: bold;
+      text-align: center;
+      width: 100%;
     }
     .start-page {
       max-width: 600px;
@@ -59,6 +71,21 @@
       background-color: white;
       border-radius: 8px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+    select, textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 14px;
     }
     button {
       font-size: 14px;
@@ -78,6 +105,13 @@
       background-color: var(--border-color);
       cursor: not-allowed;
     }
+    .controls {
+      margin-bottom: 15px;
+    }
+    #date-log-container {
+      display: flex;
+      flex-direction: column;
+    }
   </style>
 </head>
 <body>
@@ -93,6 +127,14 @@
       <div class="form-group">
         <label for="date-context">Describe the Date Context:</label>
         <textarea id="date-context" placeholder="e.g., first date at a coffee shop" rows="4" required></textarea>
+      </div>
+      <div class="form-group">
+        <label for="date-duration">Select Date Duration:</label>
+        <select id="date-duration" required>
+          <option value="10">Short (10 responses)</option>
+          <option value="20">Classic (20 responses)</option>
+          <option value="30">Long (30 responses)</option>
+        </select>
       </div>
       <button id="start-dates">Start Dates</button>
     </div>
@@ -114,6 +156,7 @@
     const downloadLogBtn = document.getElementById('download-log');
     const agentNameSelect = document.getElementById('agent-name');
     const dateContextInput = document.getElementById('date-context');
+    const dateDurationSelect = document.getElementById('date-duration');
 
     // Populate agent names in the select element
     const agentList = ["Joon", "Carolyn", "Helena", "Michael", "Percy"];
@@ -129,17 +172,49 @@
       dateLogContainer.innerHTML = '';
       dateTranscript.split('\n').forEach(log => {
         if (log.trim() === '') return;
-        const logEntry = document.createElement('div');
+
         if (log.startsWith("Date with")) {
-          logEntry.className = 'message date-start';
-          logEntry.style.fontWeight = 'bold';
-        } else if (log.startsWith(agentNameSelect.value + ":")) {
-          logEntry.className = 'message user-agent';
+          const dateHeader = document.createElement('div');
+          dateHeader.className = 'message date-start';
+          dateHeader.textContent = log;
+          dateLogContainer.appendChild(dateHeader);
         } else {
-          logEntry.className = 'message other-agent';
+          const messageDiv = document.createElement('div');
+          messageDiv.className = 'message';
+
+          // Extract sender name and message content
+          const separatorIndex = log.indexOf(': ');
+          if (separatorIndex !== -1) {
+            const sender = log.substring(0, separatorIndex);
+            const message = log.substring(separatorIndex + 2);
+
+            const senderNameDiv = document.createElement('div');
+            senderNameDiv.className = 'sender-name';
+            senderNameDiv.textContent = sender;
+
+            const messageContentDiv = document.createElement('div');
+            messageContentDiv.className = 'message-content';
+            messageContentDiv.textContent = message;
+
+            // Apply appropriate styling based on the sender
+            if (sender === agentNameSelect.value) {
+              messageDiv.classList.add('user-agent', 'message-bubble');
+            } else {
+              messageDiv.classList.add('other-agent', 'message-bubble');
+            }
+
+            messageDiv.appendChild(senderNameDiv);
+            messageDiv.appendChild(messageContentDiv);
+            dateLogContainer.appendChild(messageDiv);
+          } else {
+            // If no separator is found, treat the whole line as a message content
+            const messageContentDiv = document.createElement('div');
+            messageContentDiv.className = 'message-content';
+            messageContentDiv.textContent = log;
+            messageDiv.appendChild(messageContentDiv);
+            dateLogContainer.appendChild(messageDiv);
+          }
         }
-        logEntry.textContent = log;
-        dateLogContainer.appendChild(logEntry);
       });
       dateLogContainer.scrollTop = dateLogContainer.scrollHeight;
     }
@@ -147,6 +222,7 @@
     startDatesBtn.addEventListener('click', () => {
       const userAgentName = agentNameSelect.value;
       const dateContext = dateContextInput.value.trim();
+      const dateDuration = dateDurationSelect.value;
 
       if (!userAgentName || !dateContext) {
         alert('Please select an agent and describe the date.');
@@ -159,7 +235,8 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: userAgentName,
-          context: dateContext
+          context: dateContext,
+          duration: dateDuration
         })
       })
       .then(response => response.json())
@@ -205,6 +282,7 @@
             startPage.style.display = 'block';
             gamePage.style.display = 'none';
             downloadLogBtn.style.display = 'none';
+            dateContextInput.value = '';
           }
         });
     });
