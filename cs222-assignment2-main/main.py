@@ -16,38 +16,52 @@ class Game:
         self.user_agent = Agent(user_agent["name"], user_agent["persona"])
         self.agents = agents
         self.date_context = ""
-        self.date_logs = []
+        self.date_transcript = []
 
     def set_date_context(self, context):
         self.date_context = context
         print(f"Date context set to: {self.date_context}")
 
-    def run_date(self, agent, responses=5):
+    def run_date(self, agent, responses=10):
         """
-        Conducts a multi-response conversation between the user agent (Joon) and a date agent.
-
-        Args:
-        - agent: The agent for the date.
-        - responses: Number of conversational exchanges in the date.
+        Conducts a multi-response conversation between the user agent and a date agent.
         """
         print(f"Starting date with {agent.name}")
-        conversation_context = f"You are on a {self.date_context}. You are dating {agent.name}."
-        system_prompt_user = self._create_date_prompt(self.user_agent, agent)
-        system_prompt_agent = self._create_date_prompt(agent, self.user_agent)
+        conversation_history = []  # List of messages without speaker names
+        self.log_date(agent, f"Date with {agent.name}:\n", 0)  # Log the start of the date
 
         for i in range(responses):
-            # Joon's message (user agent's perspective)
-            user_message = f"(Response {i+1}) Describe your interaction on this date: {self.date_context}"
-            user_response = self.generate_response(system_prompt_user, conversation_context + f"\n{self.user_agent.name}: {user_message}")
-            print(f"{self.user_agent.name} (Response {i+1}): {user_response}")
-            self.log_date(agent, f"{self.user_agent.name}: {user_response}", i+1)
-            conversation_context += f"\n{self.user_agent.name}: {user_response}"
+            # Determine the stage of the date
+            if i < 2:
+                stage = "greeting"
+            elif i < 8:
+                stage = "conversation"
+            else:
+                stage = "goodbye"
 
-            # Date agent's response
-            agent_response = self.generate_response(system_prompt_agent, conversation_context)
-            print(f"{agent.name} (Response {i+1}): {agent_response}")
-            self.log_date(agent, f"{agent.name}: {agent_response}", i+1)
-            conversation_context += f"\n{agent.name}: {agent_response}"
+            # It's the user agent's turn if i % 2 == 0
+            if i % 2 == 0:
+                current_agent = self.user_agent
+                other_agent = agent
+            else:
+                current_agent = agent
+                other_agent = self.user_agent
+
+            # Update system prompt to include the current stage
+            system_prompt = self._create_date_prompt(current_agent, other_agent, stage)
+
+            # Construct conversation context without speaker names
+            conversation_context = '\n'.join(conversation_history)
+
+            # Generate response
+            response = self.generate_response(system_prompt, conversation_context)
+            print(f"{current_agent.name} (Response {i+1}): {response}")
+
+            # Append to conversation history without the speaker's name
+            conversation_history.append(response.strip())
+
+            # Log the response with speaker's name
+            self.log_date(agent, f"{current_agent.name}: {response}", i+1)
 
     def generate_response(self, system_prompt, conversation_context):
         """
@@ -58,21 +72,28 @@ class Game:
             {"role": "user", "content": conversation_context},
         ]
         response = gen_oai(messages)
-        return response
+        return response.strip()
 
-    def _create_date_prompt(self, agent, other_agent):
+    def _create_date_prompt(self, agent, other_agent, stage):
         return f"""
-        You are {agent.name}, {agent.persona}. You are on a date with {other_agent.name}. 
-        Respond in character as {agent.name}, with short, conversational responses. 
+        You are {agent.name}, {agent.persona}. You are on a date with {other_agent.name}.
+        The date should follow this structure: start with a greeting, then progress from light to deeper conversation topics, and end with a goodbye.
+        You are currently in the {stage} stage of the date.
+        Respond in character as {agent.name}, with short, conversational responses appropriate for the current stage of the date.
+        Do not include your name or any prefixes or labels in your responses.
+        Only output what you would say as {agent.name}.
         Context: {self.date_context}.
         """
-    
+
     def log_date(self, agent, response, response_number):
-        log_entry = f"Date with {agent.name} - Response {response_number}:\n{response}\n"
-        self.date_logs.append(log_entry)
+        if response_number == 0:
+            # Start a new date transcript
+            self.date_transcript.append(response)
+        else:
+            self.date_transcript.append(f"{response}\n")
 
     def get_log(self):
-        return "\n".join(self.date_logs)
+        return "\n".join(self.date_transcript)
 
 def init_game(user_agent_name, date_context):
     user_agent = next(agent for agent in agent_list if agent["name"] == user_agent_name)
@@ -110,10 +131,10 @@ def run_dates():
     print("Running dates with each agent")
     for agent in game.agents:
         print(f"Running date with {agent.name}")
-        game.run_date(agent, responses=5)  # Set responses to define length of interaction
+        game.run_date(agent, responses=10)  # Set responses to define length of interaction
 
-    print("Returning date logs")
-    return jsonify({"date_logs": game.get_log()})
+    print("Returning date transcripts")
+    return jsonify({"date_transcript": game.get_log()})
 
 @app.route('/reset', methods=['POST'])
 def reset_game():
@@ -129,10 +150,10 @@ def download_log():
         buffer = io.BytesIO()
         buffer.write(log_content.encode('utf-8'))
         buffer.seek(0)
-        return send_file(buffer, as_attachment=True, download_name='game_log.md', mimetype='text/markdown')
+        return send_file(buffer, as_attachment=True, download_name='date_transcript.md', mimetype='text/markdown')
     else:
-        print("No game log available for download")
-        return jsonify({"error": "No game log available"}), 400
+        print("No date transcript available for download")
+        return jsonify({"error": "No date transcript available"}), 400
 
 if __name__ == "__main__":
     app.run(debug=True)

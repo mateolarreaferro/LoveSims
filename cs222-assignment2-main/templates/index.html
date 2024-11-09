@@ -99,7 +99,7 @@
     <div id="game-page" style="display: none;">
       <div class="controls">
         <button id="reset-game">Reset</button>
-        <button id="download-log" style="display: none;">Download Log</button>
+        <button id="download-log" style="display: none;">Download Transcript</button>
       </div>
       <div id="date-log-container" class="game-container"></div>
     </div>
@@ -124,12 +124,20 @@
       agentNameSelect.appendChild(option);
     });
 
-    function displayDateLog(dateLogs) {
-      console.log("Displaying date logs...");
+    function displayDateLog(dateTranscript) {
+      console.log("Displaying date transcript...");
       dateLogContainer.innerHTML = '';
-      dateLogs.split('\n').forEach(log => {
+      dateTranscript.split('\n').forEach(log => {
+        if (log.trim() === '') return;
         const logEntry = document.createElement('div');
-        logEntry.className = 'message other-agent';
+        if (log.startsWith("Date with")) {
+          logEntry.className = 'message date-start';
+          logEntry.style.fontWeight = 'bold';
+        } else if (log.startsWith(agentNameSelect.value + ":")) {
+          logEntry.className = 'message user-agent';
+        } else {
+          logEntry.className = 'message other-agent';
+        }
         logEntry.textContent = log;
         dateLogContainer.appendChild(logEntry);
       });
@@ -174,12 +182,12 @@
       })
       .then(response => response.json())
       .then(data => {
-        console.log("Received date logs:", data);
-        if (data.date_logs) {
-          displayDateLog(data.date_logs);
+        console.log("Received date transcripts:", data);
+        if (data.date_transcript) {
+          displayDateLog(data.date_transcript);
           downloadLogBtn.style.display = 'inline-block';
         } else {
-          alert('Error fetching date logs.');
+          alert('Error fetching date transcripts.');
         }
       })
       .catch(error => {
