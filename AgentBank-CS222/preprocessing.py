@@ -3,11 +3,12 @@ import os
 import openai
 
 #create memories for each agent 
-def create_memories(text):
+def create_memories(text,name):
     # Format the prompt with the provided transcript
     prompt = f"""
     [Input]
-    The following is an interview transcript. Extract an exhaustive list of facts/memories of the interviewee based on transcript. Be as detailed as possible.
+    The following is an interview transcript. Extract an exhaustive list of facts/memories of the interviewee based on transcript. Be as detailed as possible. 
+    Use the pseudoname {name} to substitute the interviewee's name.
     
     Transcript:
     {text} 
@@ -47,16 +48,19 @@ def create_memories(text):
         return []
 
 def create_all_memories(directory_path):
-    openai.api_key =''
-
-    for filename in os.listdir(directory_path):
-        if filename.endswith(".txt"):
+    openai.api_key =""
+    dir_path = os.path.join(directory_path, "id_to_pseudonyms.txt")
+    with open(dir_path, "r") as dir:
+        for line in dir:
+            line = line.strip()
+            filename, pseudonym = line.split(",")
             file_path = os.path.join(directory_path, filename)
             with open(file_path, "r") as file:
                 transcript = file.read()
-                outfile = f"{os.path.splitext(filename)[0]}.py"
+                outfile = pseudonym+ ".py"
                 with open(os.path.join(directory_path, outfile), "w") as f:
-                    memories = create_memories(transcript)
-                    f.write(memories)
+                    memories = create_memories(transcript,pseudonym)
+                    f.write(pseudonym+ "_memory = "+memories)
+                    print(filename + " loaded")
 
 create_all_memories("./AgentBank-CS222")
