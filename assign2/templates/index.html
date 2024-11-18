@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Multi-Agent Dating Simulation</title>
+    <title>LoveSims</title>
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/tippy.js@6"></script>
     <link
@@ -117,11 +117,26 @@
         display: flex;
         flex-direction: column;
       }
+      /* Added CSS for inline date mode options */
+      .date-mode-options {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+      .date-mode-option {
+        display: flex;
+        align-items: center;
+        margin-right: 20px;
+      }
+      .date-mode-option label {
+        margin-right: 5px;
+        margin-bottom: 0; /* Remove margin-bottom to align vertically */
+      }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>Multi-Agent Dating Simulation</h1>
+      <h1>LoveSims</h1>
       <div id="start-page" class="start-page">
         <div class="form-group">
           <label for="agent-name">Select Your Agent:</label>
@@ -131,10 +146,16 @@
         </div>
         <div class="form-group">
           <label>Choose Date Mode:</label>
-          <input type="radio" id="date-with-all" name="date-mode" value="all" checked>
-          <label for="date-with-all">Date with all agents</label><br>
-          <input type="radio" id="date-with-one" name="date-mode" value="one">
-          <label for="date-with-one">Date with one agent</label>
+          <div class="date-mode-options">
+            <div class="date-mode-option">
+              <label for="date-with-all">Date with all agents</label>
+              <input type="radio" id="date-with-all" name="date-mode" value="all" checked>
+            </div>
+            <div class="date-mode-option">
+              <label for="date-with-one">Date with one agent</label>
+              <input type="radio" id="date-with-one" name="date-mode" value="one">
+            </div>
+          </div>
         </div>
         <div class="form-group" id="select-date-agent-group" style="display:none;">
           <label for="date-agent-name">Select Agent to Date:</label>
