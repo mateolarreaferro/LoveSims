@@ -1,407 +1,432 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>LoveSims</title>
-    <script src="https://unpkg.com/@popperjs/core@2"></script>
-    <script src="https://unpkg.com/tippy.js@6"></script>
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/tippy.js@6/themes/light.css"
-    />
-    <style>
-      :root {
-        --primary-color: #3498db;
-        --secondary-color: #2c3e50;
-        --background-color: #fcfcfc;
-        --text-color: #34495e;
-        --border-color: #bdc3c7;
-      }
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        font-size: 14px;
-        background-color: var(--background-color);
-        color: var(--text-color);
-      }
-      .container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-      }
-      .game-container {
-        width: 100%;
-        max-height: 80vh;
-        overflow-y: auto;
-        background-color: var(--background-color);
-        padding: 20px;
-        padding-top: 40px;
-      }
-      .message {
-        max-width: 70%;
-        padding: 8px 12px;
-        margin: 5px 0;
-        border-radius: 18px;
-        font-size: 14px;
-        line-height: 1.4;
-        display: flex;
-        flex-direction: column;
-      }
-      .message .sender-name {
-        font-weight: bold;
-        margin-bottom: 2px;
-      }
-      .message.user-agent {
-        background-color: var(--primary-color);
-        color: white;
-        align-self: flex-end;
-      }
-      .message.other-agent {
-        background-color: #e5e5ea;
-        color: #000000;
-        align-self: flex-start;
-      }
-      .message.date-start {
-        font-weight: bold;
-        text-align: center;
-        width: 100%;
-      }
-      .start-page {
-        max-width: 600px;
-        margin: 0 auto;
-        padding: 20px;
-        background-color: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      }
-      .form-group {
-        margin-bottom: 15px;
-      }
-      label {
-        font-weight: bold;
-        display: block;
-        margin-bottom: 5px;
-      }
-      select,
-      textarea {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid var(--border-color);
-        border-radius: 4px;
-        font-size: 14px;
-      }
-      button {
-        font-size: 14px;
-        padding: 8px 16px;
-        margin-right: 10px;
-        background-color: var(--primary-color);
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-      }
-      button:hover {
-        background-color: #2980b9;
-      }
-      button:disabled {
-        background-color: var(--border-color);
-        cursor: not-allowed;
-      }
-      .controls {
-        margin-bottom: 15px;
-      }
-      #date-log-container {
-        display: flex;
-        flex-direction: column;
-      }
-      /* Added CSS for inline date mode options */
-      .date-mode-options {
-        display: flex;
-        align-items: center;
-        margin-bottom: 15px;
-      }
-      .date-mode-option {
-        display: flex;
-        align-items: center;
-        margin-right: 20px;
-      }
-      .date-mode-option label {
-        margin-right: 5px;
-        margin-bottom: 0; /* Remove margin-bottom to align vertically */
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h1>LoveSims</h1>
-      <div id="start-page" class="start-page">
-        <div class="form-group">
-          <label for="agent-name">Select Your Agent:</label>
-          <select id="agent-name" required>
-            <!-- Options for agent names will be populated here -->
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Choose Date Mode:</label>
-          <div class="date-mode-options">
-            <div class="date-mode-option">
-              <label for="date-with-all">Date with all agents</label>
-              <input type="radio" id="date-with-all" name="date-mode" value="all" checked>
-            </div>
-            <div class="date-mode-option">
-              <label for="date-with-one">Date with one agent</label>
-              <input type="radio" id="date-with-one" name="date-mode" value="one">
-            </div>
+<head>
+  <meta charset="UTF-8">
+  <title>LoveSims</title>
+  <!-- Include any necessary CSS and JavaScript libraries -->
+  <script src="https://unpkg.com/@popperjs/core@2"></script>
+  <script src="https://unpkg.com/tippy.js@6"></script>
+  <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css" />
+  <style>
+    /* CSS Styles */
+
+    :root {
+      --primary-color: #3498db;
+      --secondary-color: #2c3e50;
+      --background-color: #fcfcfc;
+      --text-color: #34495e;
+      --border-color: #bdc3c7;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      font-size: 14px;
+      background-color: var(--background-color);
+      color: var(--text-color);
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .start-page {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+    select,
+    textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    button {
+      font-size: 14px;
+      padding: 8px 16px;
+      margin-right: 10px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    button:disabled {
+      background-color: var(--border-color);
+      cursor: not-allowed;
+    }
+    .controls {
+      margin-bottom: 15px;
+    }
+    .game-container {
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      background-color: var(--background-color);
+      padding: 20px;
+      padding-top: 40px;
+      border-radius: 8px;
+    }
+    .message {
+      max-width: 70%;
+      padding: 8px 12px;
+      margin: 5px 0;
+      border-radius: 18px;
+      font-size: 14px;
+      line-height: 1.4;
+      display: flex;
+      flex-direction: column;
+    }
+    .message .sender-name {
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+    .message.user-agent .message-bubble {
+      background-color: var(--primary-color);
+      color: white;
+      align-self: flex-end;
+    }
+    .message.other-agent .message-bubble {
+      background-color: #e5e5ea;
+      color: #000000;
+      align-self: flex-start;
+    }
+    .message.system-message .message-bubble {
+      background-color: #f1c40f;
+      color: #000;
+      align-self: center;
+    }
+    .message.date-start {
+      font-weight: bold;
+      text-align: center;
+      width: 100%;
+    }
+    /* Date mode options styling */
+    .date-mode-options {
+      display: flex;
+      align-items: center;
+    }
+    .date-mode-option {
+      display: flex;
+      align-items: center;
+      margin-right: 20px;
+    }
+    .date-mode-option label {
+      margin-right: 5px;
+      margin-bottom: 0;
+    }
+    #select-date-agent-group {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>LoveSims</h1>
+    <div id="start-page" class="start-page">
+      <div class="form-group">
+        <label for="agent-name">Select Your Agent:</label>
+        <select id="agent-name" required>
+          <!-- Options for agent names will be populated here -->
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Choose Date Mode:</label>
+        <div class="date-mode-options">
+          <div class="date-mode-option">
+            <input type="radio" id="date-with-all" name="date-mode" value="all" checked>
+            <label for="date-with-all">Date with all agents</label>
+          </div>
+          <div class="date-mode-option">
+            <input type="radio" id="date-with-one" name="date-mode" value="one">
+            <label for="date-with-one">Date with one agent</label>
           </div>
         </div>
-        <div class="form-group" id="select-date-agent-group" style="display:none;">
-          <label for="date-agent-name">Select Agent to Date:</label>
-          <select id="date-agent-name">
-            <!-- Options for agent names will be populated here -->
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="date-context">Describe the Date Context:</label>
-          <textarea
-            id="date-context"
-            placeholder="e.g., first date at a coffee shop"
-            rows="4"
-            required
-          ></textarea>
-        </div>
-        <div class="form-group">
-          <label for="date-duration">Select Date Duration:</label>
-          <select id="date-duration" required>
-            <option value="10">Short (10 responses)</option>
-            <option value="20">Classic (20 responses)</option>
-            <option value="30">Long (30 responses)</option>
-          </select>
-        </div>
-        <button id="start-dates">Start Dates</button>
       </div>
-      <div id="game-page" style="display: none">
-        <div class="controls">
-          <button id="reset-game">Reset</button>
-          <button id="download-log" style="display: none">
-            Download Transcript
-          </button>
-        </div>
-        <div id="date-log-container" class="game-container"></div>
+      <div class="form-group" id="select-date-agent-group" style="display:none;">
+        <label for="date-agent-name">Select Agent to Date:</label>
+        <select id="date-agent-name">
+          <!-- Options for agent names will be populated here -->
+        </select>
       </div>
+      <div class="form-group">
+        <label for="date-context">Describe the Date Context:</label>
+        <textarea
+          id="date-context"
+          placeholder="e.g., first date at a coffee shop"
+          rows="4"
+          required
+        ></textarea>
+      </div>
+      <div class="form-group">
+        <label for="date-duration">Select Date Duration:</label>
+        <select id="date-duration" required>
+          <option value="10">Short (10 responses)</option>
+          <option value="20">Classic (20 responses)</option>
+          <option value="30">Long (30 responses)</option>
+        </select>
+      </div>
+      <button id="start-dates">Start Dates</button>
     </div>
+    <div id="game-page" style="display: none">
+      <div class="controls">
+        <button id="reset-game">Reset</button>
+        <button id="download-log" style="display: none">
+          Download Transcript
+        </button>
+      </div>
+      <div id="date-log-container" class="game-container"></div>
+    </div>
+  </div>
 
-    <script>
-      const startPage = document.getElementById("start-page");
-      const gamePage = document.getElementById("game-page");
-      const dateLogContainer = document.getElementById("date-log-container");
-      const startDatesBtn = document.getElementById("start-dates");
-      const resetGameBtn = document.getElementById("reset-game");
-      const downloadLogBtn = document.getElementById("download-log");
-      const agentNameSelect = document.getElementById("agent-name");
-      const dateContextInput = document.getElementById("date-context");
-      const dateDurationSelect = document.getElementById("date-duration");
+  <script>
+    // JavaScript code
 
-      // Populate agent names in the select element
-      const agentList = [
-        "Julian",
-        "Sakura",
-        "Riya",
-        "Kai",
-        "Jinwoo",
-        "Mei Ling",
-        "Ethan",
-        "Anika",
-        "Jinara",
-        "Diego",
-        "Jinhee",
-        "Minji",
-        "Mingxia",
-        "Anwen",
-        "Soojin",
-        "Niran",
-        "Arjun",
-        "Eleni",
-        "Leyla",
-        "Jinsoo",
-        "Sofia",
-        "Jinaya",
-        "Lucia",
-        "Meilin",
-        "Rafael",
-        "Leila",
-        "Anaya",
-        "Lianhua",
-        "Marcus",
-        "Thao",
-        "Camila",
-        "Anjali",
-        "Yuki",
-        "Marek",
-        "Kiran",
-        "Elena",
-      ];
-      agentList.forEach((agent) => {
-        const option = document.createElement("option");
-        option.value = agent;
-        option.textContent = agent;
-        agentNameSelect.appendChild(option);
-      });
+    const startPage = document.getElementById("start-page");
+    const gamePage = document.getElementById("game-page");
+    const dateLogContainer = document.getElementById("date-log-container");
+    const startDatesBtn = document.getElementById("start-dates");
+    const resetGameBtn = document.getElementById("reset-game");
+    const downloadLogBtn = document.getElementById("download-log");
+    const agentNameSelect = document.getElementById("agent-name");
+    const dateContextInput = document.getElementById("date-context");
+    const dateDurationSelect = document.getElementById("date-duration");
+    const dateAgentNameSelect = document.getElementById("date-agent-name");
 
-      const dateAgentNameSelect = document.getElementById("date-agent-name");
-      agentList.forEach((agent) => {
-        const option = document.createElement("option");
-        option.value = agent;
-        option.textContent = agent;
-        dateAgentNameSelect.appendChild(option);
-      });
+    // Hardcoded agent list
+    const agentList = [
+      "Julian",
+      "Sakura",
+      "Riya",
+      "Kai",
+      "Jinwoo",
+      "Mei Ling",
+      "Ethan",
+      "Anika",
+      "Jinara",
+      "Diego",
+      "Jinhee",
+      "Minji",
+      "Mingxia",
+      "Anwen",
+      "Soojin",
+      "Niran",
+      "Arjun",
+      "Eleni",
+      "Leyla",
+      "Jinsoo",
+      "Sofia",
+      "Jinaya",
+      "Lucia",
+      "Meilin",
+      "Rafael",
+      "Leila",
+      "Anaya",
+      "Lianhua",
+      "Marcus",
+      "Thao",
+      "Camila",
+      "Anjali",
+      "Yuki",
+      "Marek",
+      "Kiran",
+      "Elena",
+    ];
 
-      document.getElementById("date-with-all").addEventListener("change", toggleDateAgentSelect);
-      document.getElementById("date-with-one").addEventListener("change", toggleDateAgentSelect);
+    // Populate agent-name select
+    agentList.forEach((agent) => {
+      const option = document.createElement("option");
+      option.value = agent;
+      option.textContent = agent;
+      agentNameSelect.appendChild(option);
+    });
 
-      function toggleDateAgentSelect() {
-        const dateMode = document.querySelector('input[name="date-mode"]:checked').value;
-        const selectDateAgentGroup = document.getElementById("select-date-agent-group");
-        if (dateMode === "one") {
-          selectDateAgentGroup.style.display = "block";
+    // Populate date-agent-name select
+    agentList.forEach((agent) => {
+      const option = document.createElement("option");
+      option.value = agent;
+      option.textContent = agent;
+      dateAgentNameSelect.appendChild(option);
+    });
+
+    document.getElementById("date-with-all").addEventListener("change", toggleDateAgentSelect);
+    document.getElementById("date-with-one").addEventListener("change", toggleDateAgentSelect);
+
+    function toggleDateAgentSelect() {
+      const dateMode = document.querySelector('input[name="date-mode"]:checked').value;
+      const selectDateAgentGroup = document.getElementById("select-date-agent-group");
+      if (dateMode === "one") {
+        selectDateAgentGroup.style.display = "block";
+      } else {
+        selectDateAgentGroup.style.display = "none";
+      }
+    }
+
+    function fetchDates() {
+      console.log("Starting date simulation...");
+      fetchNextMessage();
+    }
+
+    function fetchNextMessage() {
+      fetch("/next_message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.finished) {
+            console.log("All dates completed.");
+            downloadLogBtn.style.display = "inline-block";
+          } else if (data.error) {
+            console.error("Error:", data.error);
+            alert("Error: " + data.error);
+          } else {
+            console.log("Received message:", data);
+            if (data.date_started) {
+              appendDateHeader(data.message);
+            } else {
+              appendToDateLog(`${data.agent_name}: ${data.message}`);
+            }
+            // Wait a bit before fetching the next message
+            setTimeout(fetchNextMessage, 500); // Adjust the delay as needed
+          }
+        })
+        .catch((error) => {
+          console.error("Error in fetchNextMessage:", error);
+        });
+    }
+
+    function appendDateHeader(header) {
+      const dateHeader = document.createElement("div");
+      dateHeader.className = "message date-start";
+      dateHeader.textContent = header;
+      dateLogContainer.appendChild(dateHeader);
+    }
+
+    function appendToDateLog(log) {
+      if (log.trim() === "") return;
+
+      const messageDiv = document.createElement("div");
+      messageDiv.className = "message";
+
+      // Extract sender name and message content
+      const separatorIndex = log.indexOf(": ");
+      if (separatorIndex !== -1) {
+        const sender = log.substring(0, separatorIndex);
+        const message = log.substring(separatorIndex + 2);
+
+        const senderNameDiv = document.createElement("div");
+        senderNameDiv.className = "sender-name";
+        senderNameDiv.textContent = sender;
+
+        const messageContentDiv = document.createElement("div");
+        messageContentDiv.className = "message-bubble";
+        messageContentDiv.textContent = message;
+
+        // Apply appropriate styling based on the sender
+        if (sender === agentNameSelect.value) {
+          messageDiv.classList.add("user-agent");
+        } else if (sender === "System") {
+          messageDiv.classList.add("system-message");
         } else {
-          selectDateAgentGroup.style.display = "none";
+          messageDiv.classList.add("other-agent");
         }
+
+        messageDiv.appendChild(senderNameDiv);
+        messageDiv.appendChild(messageContentDiv);
+        dateLogContainer.appendChild(messageDiv);
+      } else {
+        // If no separator is found, treat the whole line as a message content
+        const messageContentDiv = document.createElement("div");
+        messageContentDiv.className = "message-content";
+        messageContentDiv.textContent = log;
+        messageDiv.appendChild(messageContentDiv);
+        dateLogContainer.appendChild(messageDiv);
+      }
+      dateLogContainer.scrollTop = dateLogContainer.scrollHeight;
+    }
+
+    startDatesBtn.addEventListener("click", () => {
+      const userAgentName = agentNameSelect.value;
+      const dateContext = dateContextInput.value.trim();
+      const dateDuration = dateDurationSelect.value;
+      const dateMode = document.querySelector('input[name="date-mode"]:checked').value;
+
+      let dateAgentName = null;
+      if (dateMode === "one") {
+        dateAgentName = dateAgentNameSelect.value;
       }
 
-      function displayDateLog(dateTranscript) {
-        console.log("Displaying date transcript...");
-        dateLogContainer.innerHTML = "";
-        dateTranscript.split("\n").forEach((log) => {
-          if (log.trim() === "") return;
+      if (!userAgentName || !dateContext) {
+        alert("Please select an agent and describe the date.");
+        return;
+      }
 
-          if (log.startsWith("Date with")) {
-            const dateHeader = document.createElement("div");
-            dateHeader.className = "message date-start";
-            dateHeader.textContent = log;
-            dateLogContainer.appendChild(dateHeader);
+      console.log("Starting dates with selected agent:", userAgentName);
+      fetch("/start_dates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: userAgentName,
+          context: dateContext,
+          duration: dateDuration,
+          date_mode: dateMode,
+          date_agent_name: dateAgentName,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === "success") {
+            startPage.style.display = "none";
+            gamePage.style.display = "block";
+            fetchDates();
+          } else if (data.error) {
+            alert("Error: " + data.error);
           } else {
-            const messageDiv = document.createElement("div");
-            messageDiv.className = "message";
-
-            // Extract sender name and message content
-            const separatorIndex = log.indexOf(": ");
-            if (separatorIndex !== -1) {
-              const sender = log.substring(0, separatorIndex);
-              const message = log.substring(separatorIndex + 2);
-
-              const senderNameDiv = document.createElement("div");
-              senderNameDiv.className = "sender-name";
-              senderNameDiv.textContent = sender;
-
-              const messageContentDiv = document.createElement("div");
-              messageContentDiv.className = "message-content";
-              messageContentDiv.textContent = message;
-
-              // Apply appropriate styling based on the sender
-              if (sender === agentNameSelect.value) {
-                messageDiv.classList.add("user-agent", "message-bubble");
-              } else {
-                messageDiv.classList.add("other-agent", "message-bubble");
-              }
-
-              messageDiv.appendChild(senderNameDiv);
-              messageDiv.appendChild(messageContentDiv);
-              dateLogContainer.appendChild(messageDiv);
-            } else {
-              // If no separator is found, treat the whole line as a message content
-              const messageContentDiv = document.createElement("div");
-              messageContentDiv.className = "message-content";
-              messageContentDiv.textContent = log;
-              messageDiv.appendChild(messageContentDiv);
-              dateLogContainer.appendChild(messageDiv);
-            }
+            alert("Failed to start the simulation. Please try again.");
           }
         });
-        dateLogContainer.scrollTop = dateLogContainer.scrollHeight;
-      }
+    });
 
-      startDatesBtn.addEventListener("click", () => {
-        const userAgentName = agentNameSelect.value;
-        const dateContext = dateContextInput.value.trim();
-        const dateDuration = dateDurationSelect.value;
-        const dateMode = document.querySelector('input[name="date-mode"]:checked').value;
+    resetGameBtn.addEventListener("click", () => {
+      console.log("Resetting simulation...");
+      fetch("/reset", { method: "POST" })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === "reset") {
+            dateLogContainer.innerHTML = "";
+            startPage.style.display = "block";
+            gamePage.style.display = "none";
+            downloadLogBtn.style.display = "none";
+            dateContextInput.value = "";
+          }
+        });
+    });
 
-        let dateAgentName = null;
-        if (dateMode === "one") {
-          dateAgentName = dateAgentNameSelect.value;
-        }
-
-        if (!userAgentName || !dateContext) {
-          alert("Please select an agent and describe the date.");
-          return;
-        }
-
-        console.log("Starting dates with selected agent:", userAgentName);
-        fetch("/start_dates", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: userAgentName,
-            context: dateContext,
-            duration: dateDuration,
-            date_mode: dateMode,
-            date_agent_name: dateAgentName,
-          }),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.status === "success") {
-              startPage.style.display = "none";
-              gamePage.style.display = "block";
-              fetchDates();
-            } else {
-              alert("Failed to start the simulation. Please try again.");
-            }
-          });
-      });
-
-      function fetchDates() {
-        console.log("Fetching dates...");
-        fetch("/run_dates", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            console.log("Received date transcripts:", data);
-            if (data.date_transcript) {
-              displayDateLog(data.date_transcript);
-              downloadLogBtn.style.display = "inline-block";
-            } else {
-              alert("Error fetching date transcripts.");
-            }
-          })
-          .catch((error) => {
-            console.error("Error in fetchDates:", error);
-          });
-      }
-
-      resetGameBtn.addEventListener("click", () => {
-        console.log("Resetting game...");
-        fetch("/reset", { method: "POST" })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.status === "reset") {
-              dateLogContainer.innerHTML = "";
-              startPage.style.display = "block";
-              gamePage.style.display = "none";
-              downloadLogBtn.style.display = "none";
-              dateContextInput.value = "";
-            }
-          });
-      });
-
-      downloadLogBtn.addEventListener("click", () => {
-        window.location.href = "/download_log";
-      });
-    </script>
-  </body>
+    downloadLogBtn.addEventListener("click", () => {
+      window.location.href = "/download_log";
+    });
+  </script>
+</body>
 </html>
