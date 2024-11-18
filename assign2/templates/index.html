@@ -130,6 +130,19 @@
           </select>
         </div>
         <div class="form-group">
+          <label>Choose Date Mode:</label>
+          <input type="radio" id="date-with-all" name="date-mode" value="all" checked>
+          <label for="date-with-all">Date with all agents</label><br>
+          <input type="radio" id="date-with-one" name="date-mode" value="one">
+          <label for="date-with-one">Date with one agent</label>
+        </div>
+        <div class="form-group" id="select-date-agent-group" style="display:none;">
+          <label for="date-agent-name">Select Agent to Date:</label>
+          <select id="date-agent-name">
+            <!-- Options for agent names will be populated here -->
+          </select>
+        </div>
+        <div class="form-group">
           <label for="date-context">Describe the Date Context:</label>
           <textarea
             id="date-context"
@@ -216,6 +229,27 @@
         agentNameSelect.appendChild(option);
       });
 
+      const dateAgentNameSelect = document.getElementById("date-agent-name");
+      agentList.forEach((agent) => {
+        const option = document.createElement("option");
+        option.value = agent;
+        option.textContent = agent;
+        dateAgentNameSelect.appendChild(option);
+      });
+
+      document.getElementById("date-with-all").addEventListener("change", toggleDateAgentSelect);
+      document.getElementById("date-with-one").addEventListener("change", toggleDateAgentSelect);
+
+      function toggleDateAgentSelect() {
+        const dateMode = document.querySelector('input[name="date-mode"]:checked').value;
+        const selectDateAgentGroup = document.getElementById("select-date-agent-group");
+        if (dateMode === "one") {
+          selectDateAgentGroup.style.display = "block";
+        } else {
+          selectDateAgentGroup.style.display = "none";
+        }
+      }
+
       function displayDateLog(dateTranscript) {
         console.log("Displaying date transcript...");
         dateLogContainer.innerHTML = "";
@@ -272,6 +306,12 @@
         const userAgentName = agentNameSelect.value;
         const dateContext = dateContextInput.value.trim();
         const dateDuration = dateDurationSelect.value;
+        const dateMode = document.querySelector('input[name="date-mode"]:checked').value;
+
+        let dateAgentName = null;
+        if (dateMode === "one") {
+          dateAgentName = dateAgentNameSelect.value;
+        }
 
         if (!userAgentName || !dateContext) {
           alert("Please select an agent and describe the date.");
@@ -286,6 +326,8 @@
             name: userAgentName,
             context: dateContext,
             duration: dateDuration,
+            date_mode: dateMode,
+            date_agent_name: dateAgentName,
           }),
         })
           .then((response) => response.json())

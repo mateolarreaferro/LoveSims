@@ -51,10 +51,10 @@ class Game:
             system_prompt = self._create_date_prompt(current_agent, other_agent, stage)
 
             # Construct conversation context without speaker names
-            conversation_context = '\n'.join(conversation_history)
+            conversation_history_text = '\n'.join(conversation_history)
 
             # Generate response
-            response = self.generate_response(system_prompt, conversation_context)
+            response = self.generate_response(system_prompt, conversation_history_text)
             print(f"{current_agent.name} (Response {i+1}): {response}")
 
             # Append to conversation history without the speaker's name
@@ -96,11 +96,17 @@ class Game:
     def get_log(self):
         return "\n".join(self.date_transcript)
 
-def init_game(user_agent_name, date_context, date_duration):
+def init_game(user_agent_name, date_context, date_duration, date_mode='all', date_agent_name=None):
     print(user_agent_name)
     print(agent_list)
     user_agent = next(agent for agent in agent_list if agent["name"] == user_agent_name)
-    other_agents = [Agent(agent_data["name"], agent_data["persona"]) for agent_data in agent_list if agent_data["name"] != user_agent_name]
+    
+    if date_mode == 'one' and date_agent_name:
+        # Only date with selected agent
+        other_agents = [Agent(agent_data["name"], agent_data["persona"]) for agent_data in agent_list if agent_data["name"] == date_agent_name]
+    else:
+        # Date with all other agents
+        other_agents = [Agent(agent_data["name"], agent_data["persona"]) for agent_data in agent_list if agent_data["name"] != user_agent_name]
     game = Game(user_agent, other_agents, date_duration)
     game.set_date_context(date_context)
     return game
@@ -119,9 +125,11 @@ def start_dates():
     user_agent_name = data['name']
     date_context = data['context']
     date_duration = int(data.get('duration', 10))  # Default to 10 if not provided
+    date_mode = data.get('date_mode', 'all')
+    date_agent_name = data.get('date_agent_name', None)
 
-    game = init_game(user_agent_name, date_context, date_duration)
-    print(f"Game initialized with agent: {user_agent_name}, context: {date_context}, duration: {date_duration}")
+    game = init_game(user_agent_name, date_context, date_duration, date_mode, date_agent_name)
+    print(f"Game initialized with agent: {user_agent_name}, context: {date_context}, duration: {date_duration}, date_mode: {date_mode}, date_agent_name: {date_agent_name}")
     return jsonify({"status": "success"})
 
 @app.route('/run_dates', methods=['POST'])
