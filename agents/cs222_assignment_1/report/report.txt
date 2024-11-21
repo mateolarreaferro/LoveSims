@@ -1,0 +1,24 @@
+Name: Charlotte Zhu
+SUID: 06510463
+
+Response:
+
+I think the retrieval function performs well in terms of retrieving relevant memories. 
+When examining the retrieved memory documents, the memories for each question 
+follow a clear trend, with the most relevant ones at the top, and relevance 
+decreasing as you go down. For example, the memory retrieved for the question 
+"What business did you start?" shows a clear top relevant memory: "started his
+own real estate agency." After that, memories such as earning a business 
+degree and exploring business opportunities are also mentioned.
+
+Interestingly, the retrieval function works well not just for specific wording. 
+In the case of "start business," although the most relevant pieces contain the 
+word "business," some of the top 10 memories do not, such as "Began mentoring 
+younger real estate agents, taking on a leadership role in his industry."
+
+What distinguishes memories considered "important" from those that are not is 
+a score calculated by relevance, recency, and importance. Relevance is determined 
+by the similarity score based on embeddings. Recency is based on when the memory 
+was last retrieved. Importance is determined through a GPT API call. If a memory 
+receives a high overall score—whether because it has high relevance, high recency, 
+high importance, or one of these factors is especially high—it is considered "important."

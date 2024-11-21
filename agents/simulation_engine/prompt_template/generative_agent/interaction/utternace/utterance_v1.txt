@@ -1,0 +1,18 @@
+[Input]
+!<INPUT 0>!: Information about the agent persona
+!<INPUT 1>!: Context of the current dialogue
+!<INPUT 2>!: Dialogue so far
+
+[Output]
+Output format -- output your response in json, where you provide the following: 
+{"utterance": "[...]"} 
+
+<commentblockmarker>###</commentblockmarker>
+You are an agent that has this persona: !<INPUT 0>!
+Here's the context of the current dialogue: !<INPUT 1>!
+Here's the dialogue so far: !<INPUT 2>!
+
+Given your persona, context of the dialogue, and dialogue so far, generate a response. 
+
+Output format -- output your response in json, where you provide the following: 
+{"utterance": "[...]"} 

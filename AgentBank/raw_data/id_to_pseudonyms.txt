@@ -3,7 +3,7 @@ changamy.txt,Sakura
 riyadule.txt,Riya
 huanxing.txt,Kai
 wpo.txt,Jinwoo
-yinjunw.txt,Mei Ling
+yinjunw.txt,Mei
 bob9001.txt,Ethan
 jmkrause.txt,Anika
 junyiji3.txt,Jinara
