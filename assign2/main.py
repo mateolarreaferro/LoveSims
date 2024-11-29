@@ -1,12 +1,19 @@
 import os
+import csv
 import random
 import io
 from flask import Flask, render_template, jsonify, request, send_file, Response
 from flask_cors import CORS
 from agents import agent_list  # Ensure this file exists with proper agent data
-from llm_utils import *  # Ensure llm_utils.py is correctly set up
-import csv
-import ast
+from llm_utils import *
+from evaluation_prompts import (
+    SELF_REFLECTION_FORMAT,
+    TRANSCRIPT_ANALYSIS_FORMAT,
+    PROFILE_ANALYSIS_FORMAT,
+    get_self_reflection_prompt,
+    get_transcript_analysis_prompt,
+    get_profile_analysis_prompt
+)
 
 class Agent:
     def __init__(self, name, persona):
@@ -275,94 +282,76 @@ def evaluate():
         return {'profile': profile, 'memories': memories}
     
     if eval_type in ['self-reflection', 'all'] and mode in ['one-to-one', 'one-to-all']:
-        # Self-reflection evaluation with JSON format
-        agent_profile = get_agent_profile(agents[0])
-        reflection_prompt = f"""You are {agents[0]}. Based on your profile:
-{agent_profile['profile']}
+        if mode == 'one-to-one':
+            # Get reflections from both agents
+            for agent_name in agents[:2]:  # Get first two agents for one-to-one
+                agent_profile = get_agent_profile(agent_name)
+                other_agent = agents[1] if agent_name == agents[0] else agents[0]
+                
+                prompt = get_self_reflection_prompt(
+                    agent_name=agent_name,
+                    agent_profile=agent_profile['profile'],
+                    memories=agent_profile['memories'],
+                    other_agent=other_agent,
+                    context=game.date_context if game else '',
+                    transcript=transcript
+                )
 
-And your memories:
-{agent_profile['memories']}
-
-You just had a conversation in the context: {game.date_context if game else ''}
-
-Here's the transcript:
-{transcript}
-
-Please reflect on this interaction by answering these questions."""
-
-        reflection_format = {
-            "satisfactionScore": 8,  # Example: 1-10 rating
-            "lengthFeedback": "Just right",  # Example: "Too little", "Too much", or "Just right"
-            "attributeImportance": {
-                "Attractiveness": 20,  # Example points distribution
-                "Sincerity": 20,
-                "Intelligence": 15,
-                "Fun": 15,
-                "Ambition": 15,
-                "SharedInterests": 15
-            },
-            "analysis": "Brief analysis of the interaction and compatibility..."  # Example analysis text
-        }
+                reflection = json_gen_oai(prompt, SELF_REFLECTION_FORMAT)
+                results.append({
+                    'type': 'self-reflection',
+                    'agent': agent_name,
+                    **reflection
+                })
         
-        reflection = json_gen_oai(reflection_prompt, reflection_format)
-        results.append({
-            'type': 'self-reflection',
-            **reflection
-        })
+        else:  # one-to-many mode
+            # Get first agent's reflection on each interaction
+            main_agent = agents[0]
+            main_profile = get_agent_profile(main_agent)
+            
+            for other_agent in agents[1:]:  # Skip the first agent
+                prompt = get_self_reflection_prompt(
+                    agent_name=main_agent,
+                    agent_profile=main_profile['profile'],
+                    memories=main_profile['memories'],
+                    other_agent=other_agent,
+                    context=game.date_context if game else '',
+                    transcript=transcript
+                )
+
+                reflection = json_gen_oai(prompt, SELF_REFLECTION_FORMAT)
+                results.append({
+                    'type': 'self-reflection',
+                    'agent': main_agent,
+                    'target': other_agent,
+                    **reflection
+                })
     
     if eval_type in ['transcript-based', 'all']:
-        # Third-party transcript-based evaluation with JSON format
-        transcript_prompt = f"""As a neutral third-party evaluator, analyze this conversation between {' and '.join(agents)}:
-
-Context: {game.date_context if game else ''}
-
-Transcript:
-{transcript}
-
-Please analyze their interaction and compatibility."""
-
-        transcript_format = {
-            "analysis": "Detailed analysis of the interaction...",  # Example analysis text
-            "compatibilityScore": 85,  # Example: 0-100 score
-            "keyFactors": [  # Example factors
-                "Strong shared interests",
-                "Similar communication styles",
-                "Compatible values"
-            ]
-        }
+        prompt = get_transcript_analysis_prompt(
+            agents=agents,
+            context=game.date_context if game else '',
+            transcript=transcript
+        )
         
-        evaluation = json_gen_oai(transcript_prompt, transcript_format)
+        evaluation = json_gen_oai(prompt, TRANSCRIPT_ANALYSIS_FORMAT)
         results.append({
             'type': 'transcript-based',
             **evaluation
         })
     
     if eval_type in ['profiles-based', 'all']:
-        # Third-party profile-based evaluation with JSON format
         profiles = [get_agent_profile(agent) for agent in agents]
-        profiles_prompt = f"""As a neutral third-party matchmaker, analyze the compatibility between these individuals based on their profiles and memories:
-
-Person 1 ({agents[0]}):
-Profile: {profiles[0]['profile']}
-Memories: {profiles[0]['memories']}
-
-Person 2 ({agents[1]}):
-Profile: {profiles[1]['profile']}
-Memories: {profiles[1]['memories']}
-
-Please analyze their potential compatibility."""
-
-        profiles_format = {
-            "analysis": "Detailed analysis of potential compatibility...",  # Example analysis text
-            "compatibilityScore": 75,  # Example: 0-100 score
-            "keyFactors": [  # Example factors
-                "Complementary personalities",
-                "Similar background",
-                "Shared values"
-            ]
-        }
+        prompt = get_profile_analysis_prompt(
+            agent1=agents[0],
+            profile1=profiles[0]['profile'],
+            memories1=profiles[0]['memories'],
+            agent2=agents[1],
+            profile2=profiles[1]['profile'],
+            memories2=profiles[1]['memories']
+        )
         
-        evaluation = json_gen_oai(profiles_prompt, profiles_format)
+        evaluation = json_gen_oai(prompt, PROFILE_ANALYSIS_FORMAT)
         results.append({
             'type': 'profiles-based',
             **evaluation

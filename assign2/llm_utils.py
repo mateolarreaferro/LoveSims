@@ -177,7 +177,7 @@ def json_gen_oai(prompt, response_format, model='gpt-4o', temperature=1):
         {"role": "system", "content": "You are a helpful assistant that always responds in the exact JSON format specified."},
         {"role": "user", "content": f"""
 Please provide a response in the following JSON format:
-{json.dumps(response_format, indent=2)}
+{response_format}
 
 Here is the task:
 {prompt}
