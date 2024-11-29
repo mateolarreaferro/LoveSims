@@ -5,6 +5,8 @@ from flask import Flask, render_template, jsonify, request, send_file, Response
 from flask_cors import CORS
 from agents import agent_list  # Ensure this file exists with proper agent data
 from llm_utils import *  # Ensure llm_utils.py is correctly set up
+import csv
+import ast
 
 class Agent:
     def __init__(self, name, persona):
@@ -114,6 +116,29 @@ app = Flask(__name__)
 CORS(app)
 game = None
 
+# Load agent name mapping
+agent_id_map = {}
+with open(os.path.join('..', 'AgentBank', 'raw_data', 'id_to_pseudonyms.txt'), 'r') as f:
+    reader = csv.reader(f)
+    for row in reader:
+        if len(row) == 2:
+            file_id, display_name = row
+            file_id = file_id.strip()
+            display_name = display_name.strip()
+            agent_id_map[display_name] = file_id.replace('.txt', '')
+
+def parse_memory_file(content):
+    try:
+        # Find the list content between square brackets
+        start = content.find('[')
+        end = content.rfind(']')
+        if start != -1 and end != -1:
+            list_content = content[start:end + 1]
+            return ast.literal_eval(list_content)
+    except:
+        pass
+    return ["Error parsing memories file"]
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -180,6 +205,36 @@ def download_log():
     else:
         print("No date transcript available for download")
         return jsonify({"error": "No date transcript available"}), 400
+
+@app.route('/agent/<display_name>')
+def get_agent_details(display_name):
+    try:
+        # Get the file ID for this display name
+        file_id = agent_id_map.get(display_name)
+        if not file_id:
+            return jsonify({"error": f"No mapping found for agent {display_name}"})
+
+        response_data = {
+            "profile": "",
+            "memories": []
+        }
+
+        # Get profile from raw_data
+        profile_file = os.path.join('..', 'AgentBank', 'raw_data', f'{file_id}.txt')
+        if os.path.exists(profile_file):
+            with open(profile_file, 'r') as f:
+                response_data["profile"] = f.read()
+
+        # Get memories from memories directory
+        memory_file = os.path.join('..', 'AgentBank', 'memories', f'{display_name}.py')
+        if os.path.exists(memory_file):
+            with open(memory_file, 'r') as f:
+                content = f.read()
+                response_data["memories"] = parse_memory_file(content)
+                
+        return jsonify(response_data)
+    except Exception as e:
+        return jsonify({"error": f"Error loading agent details: {str(e)}"})
 
 if __name__ == "__main__":
     app.run(debug=True)
