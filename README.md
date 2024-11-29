@@ -19,3 +19,22 @@ We anticipate that this project will:
 [Proposal Document](https://docs.google.com/document/d/1t_eptHVRG8HG3ZpN9EcgMT3HyJPvA-cdw-VBTQjVEUA/edit?usp=sharing)
 
 
+## How to Run
+
+1. Navigate to the `assign2` directory.
+
+2. Split your terminal into two windows.
+
+3. In the first terminal:
+   ```
+   cd lovesims-nextjs
+   npm install
+   npm run dev
+   ```
+
+4. In the second terminal:
+   ```
+   python3 main.py
+   ```
+
+Make sure to maintain proper indentation when running these commands.
