@@ -2,6 +2,7 @@ import os
 import random
 import io
 from flask import Flask, render_template, jsonify, request, send_file, Response
+from flask_cors import CORS
 from agents import agent_list  # Ensure this file exists with proper agent data
 from llm_utils import *  # Ensure llm_utils.py is correctly set up
 
@@ -110,6 +111,7 @@ class Game:
         return "\n".join([msg["response"] for msg in self.date_transcript])
 
 app = Flask(__name__)
+CORS(app)
 game = None
 
 @app.route('/')

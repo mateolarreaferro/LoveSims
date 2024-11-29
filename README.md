@@ -17,3 +17,5 @@ We anticipate that this project will:
 - Inform future developments in personalized AI companionship, dating simulations, and AI-based relationship counseling.
 
 [Proposal Document](https://docs.google.com/document/d/1t_eptHVRG8HG3ZpN9EcgMT3HyJPvA-cdw-VBTQjVEUA/edit?usp=sharing)
+
+
