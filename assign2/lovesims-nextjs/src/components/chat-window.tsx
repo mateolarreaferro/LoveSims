@@ -17,8 +17,16 @@ export function ChatWindow({ messages, className = '' }: ChatWindowProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Scroll to bottom whenever messages change
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      const scrollElement = scrollRef.current;
+      // Use requestAnimationFrame to ensure DOM has updated
+      requestAnimationFrame(() => {
+        scrollElement.scrollTo({
+          top: scrollElement.scrollHeight,
+          behavior: 'smooth'
+        });
+      });
     }
   }, [messages]);
 
@@ -29,10 +37,10 @@ export function ChatWindow({ messages, className = '' }: ChatWindowProps) {
           {messages.map((message, index) => (
             <div
               key={index}
-              className={`flex flex-col max-w-[80%] ${
+              className={`flex flex-col ${
                 message.number === 0
-                  ? 'mx-auto text-center font-semibold'
-                  : 'ml-4'
+                  ? 'mx-auto text-center font-semibold max-w-[80%]'
+                  : 'ml-4 max-w-[80%]'
               }`}
             >
               {message.number !== 0 && (
@@ -44,7 +52,9 @@ export function ChatWindow({ messages, className = '' }: ChatWindowProps) {
                 className={`rounded-lg p-3 ${
                   message.number === 0
                     ? 'bg-muted'
-                    : 'bg-primary text-primary-foreground'
+                    : message.number % 2 === 1
+                    ? 'bg-[#E6F3FF] text-gray-800' // Light blue
+                    : 'bg-[#FFE6F0] text-gray-800' // Light pink
                 }`}
               >
                 {message.number === 0
