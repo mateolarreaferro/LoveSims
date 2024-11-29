@@ -124,29 +124,55 @@
       <h1>Multi-Agent Dating Simulation</h1>
       <div id="start-page" class="start-page">
         <div class="form-group">
-          <label for="agent-name">Select Your Agent:</label>
-          <select id="agent-name" required>
-            <!-- Options for agent names will be populated here -->
+          <label for="matching-mode">Matching Mode:</label>
+          <select id="matching-mode" class="form-control">
+            <option value="one-to-one">One-to-One Match</option>
+            <option value="one-to-all">One-to-All Match</option>
+            <option value="all-pairs">All Pairs Match</option>
           </select>
         </div>
-        <div class="form-group">
-          <label for="date-context">Describe the Date Context:</label>
+
+        <div id="agent-selection" class="form-group">
+          <div id="one-to-one-agents" style="display: none;">
+            <div class="form-group">
+              <label for="agent1-select">First Agent:</label>
+              <select id="agent1-select" class="form-control"></select>
+            </div>
+            <div class="form-group">
+              <label for="agent2-select">Second Agent:</label>
+              <select id="agent2-select" class="form-control"></select>
+            </div>
+          </div>
+
+          <div id="one-to-all-agent" style="display: none;">
+            <label for="single-agent-select">Select Agent:</label>
+            <select id="single-agent-select" class="form-control"></select>
+          </div>
+        </div>
+
+        <div id="date-context-group" class="form-group">
+          <label for="date-context">Date Context:</label>
           <textarea
             id="date-context"
-            placeholder="e.g., first date at a coffee shop"
-            rows="4"
-            required
+            rows="3"
+            placeholder="Describe the date context..."
           ></textarea>
         </div>
+
         <div class="form-group">
-          <label for="date-duration">Select Date Duration:</label>
-          <select id="date-duration" required>
-            <option value="10">Short (10 responses)</option>
-            <option value="20">Classic (20 responses)</option>
-            <option value="30">Long (30 responses)</option>
+          <label for="date-duration">Responses per Date:</label>
+          <select id="date-duration" class="form-control">
+            <option value="6">6 responses</option>
+            <option value="10" selected>10 responses</option>
+            <option value="16">16 responses</option>
           </select>
         </div>
-        <button id="start-dates">Start Dates</button>
+
+        <button id="start-dates" class="btn btn-primary">Start Dates</button>
+        <button id="reset-game" class="btn btn-secondary">Reset</button>
+        <button id="download-log" class="btn btn-secondary" style="display: none">
+          Download Log
+        </button>
       </div>
       <div id="game-page" style="display: none">
         <div class="controls">
@@ -166,11 +192,13 @@
       const startDatesBtn = document.getElementById("start-dates");
       const resetGameBtn = document.getElementById("reset-game");
       const downloadLogBtn = document.getElementById("download-log");
-      const agentNameSelect = document.getElementById("agent-name");
+      const agent1Select = document.getElementById("agent1-select");
+      const agent2Select = document.getElementById("agent2-select");
+      const singleAgentSelect = document.getElementById("single-agent-select");
       const dateContextInput = document.getElementById("date-context");
       const dateDurationSelect = document.getElementById("date-duration");
 
-      // Populate agent names in the select element
+      // Populate agent selects
       const agentList = [
         "Julian",
         "Sakura",
@@ -210,10 +238,37 @@
         "Elena",
       ];
       agentList.forEach((agent) => {
-        const option = document.createElement("option");
-        option.value = agent;
-        option.textContent = agent;
-        agentNameSelect.appendChild(option);
+        ['agent1-select', 'agent2-select', 'single-agent-select'].forEach(selectId => {
+          const select = document.getElementById(selectId);
+          const option = document.createElement("option");
+          option.value = agent;
+          option.textContent = agent;
+          select.appendChild(option);
+        });
+      });
+
+      // Handle matching mode changes
+      const matchingMode = document.getElementById('matching-mode');
+      const oneToOneAgents = document.getElementById('one-to-one-agents');
+      const oneToAllAgent = document.getElementById('one-to-all-agent');
+      const dateContextGroup = document.getElementById('date-context-group');
+
+      matchingMode.addEventListener('change', () => {
+        oneToOneAgents.style.display = 'none';
+        oneToAllAgent.style.display = 'none';
+        dateContextGroup.style.display = 'block';
+
+        switch(matchingMode.value) {
+          case 'one-to-one':
+            oneToOneAgents.style.display = 'block';
+            break;
+          case 'one-to-all':
+            oneToAllAgent.style.display = 'block';
+            break;
+          case 'all-pairs':
+            dateContextGroup.style.display = 'none';
+            break;
+        }
       });
 
       function displayMessage(messageData) {
@@ -224,7 +279,7 @@
           messageDiv.className = "message date-start";
           messageDiv.textContent = messageData.response;
         } else {
-          const isUserAgent = messageData.response.startsWith(agentNameSelect.value + ":");
+          const isUserAgent = messageData.response.startsWith(agent1Select.value + ":");
           messageDiv.className = `message ${isUserAgent ? "user-agent" : "other-agent"}`;
           
           const senderNameDiv = document.createElement("div");
@@ -284,23 +339,42 @@
       }
 
       startDatesBtn.addEventListener("click", () => {
-        const userAgentName = agentNameSelect.value;
-        const dateContext = dateContextInput.value.trim();
+        const mode = matchingMode.value;
+        let selectedAgents = [];
+        let dateContext = '';
+
+        switch(mode) {
+          case 'one-to-one':
+            selectedAgents = [
+              document.getElementById('agent1-select').value,
+              document.getElementById('agent2-select').value
+            ];
+            dateContext = dateContextInput.value.trim();
+            break;
+          case 'one-to-all':
+            selectedAgents = [document.getElementById('single-agent-select').value];
+            dateContext = dateContextInput.value.trim();
+            break;
+          case 'all-pairs':
+            selectedAgents = ['all'];
+            break;
+        }
+
         const dateDuration = dateDurationSelect.value;
 
-        if (!userAgentName || !dateContext) {
-          alert("Please select an agent and describe the date.");
+        if ((mode !== 'all-pairs' && !dateContext) || !dateDuration) {
+          alert("Please fill in all required fields.");
           return;
         }
 
-        console.log("Starting dates with selected agent:", userAgentName);
         fetch("/start_dates", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            name: userAgentName,
-            context: dateContext,
-            duration: dateDuration,
+            mode: mode,
+            agents: selectedAgents,
+            dateContext: dateContext,
+            dateDuration: parseInt(dateDuration),
           }),
         })
           .then((response) => response.json())
