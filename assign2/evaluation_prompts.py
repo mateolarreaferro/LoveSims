@@ -58,12 +58,17 @@ Here's the transcript:
 {transcript}
 
 Please reflect on this interaction by providing:
-1. A satisfaction score (0-100)
+1. A satisfaction score (0-100). Be critical and honest - not every interaction is perfect. Consider:
+   - How well did you connect?
+   - Were there any awkward moments or misunderstandings?
+   - Did they match your preferences and interests?
+   - Would you want to meet them again?
+
 2. Feedback on conversation length
-3. Ratings (0-100) for different attributes
+3. Ratings (0-100) for different attributes, being specific to this interaction
 4. A brief analysis of the interaction
 
-Be honest and thorough in your evaluation."""
+Be brutally honest in your evaluation. Don't be afraid to give low scores if the interaction wasn't great."""
 
 def get_transcript_analysis_prompt(agents, context, transcript):
     return f"""As a neutral third-party evaluator, analyze this conversation between {' and '.join(agents)}:

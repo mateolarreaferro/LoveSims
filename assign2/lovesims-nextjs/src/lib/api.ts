@@ -36,13 +36,26 @@ export async function resetGame() {
 
 export type EvaluationType = 'self-reflection' | 'transcript-based' | 'profiles-based' | 'all';
 
+interface AttributeScores {
+  Attractiveness: number;
+  Sincerity: number;
+  Intelligence: number;
+  Fun: number;
+  Ambition: number;
+  SharedInterests: number;
+}
+
 export interface EvaluationResult {
   type: EvaluationType;
   analysis: string;
+  agent?: string;  // For self-reflection
+  target?: string; // For one-to-many self-reflection
   compatibilityScore?: number;
   satisfactionScore?: number;
   lengthFeedback?: string;
-  attributeImportance?: Record<string, number>;
+  attributeRatings?: AttributeScores;
+  attributeSimilarity?: AttributeScores;
+  keyFactors?: string[];
 }
 
 export async function runEvaluation(data: {

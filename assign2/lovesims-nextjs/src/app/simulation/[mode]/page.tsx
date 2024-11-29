@@ -256,7 +256,11 @@ export default function SimulationModePage() {
                   <CardContent className="space-y-4">
                     {evaluationResults.map((result, index) => (
                       <div key={index} className="space-y-2">
-                        <h3 className="font-semibold capitalize">{result.type} Analysis</h3>
+                        <h3 className="font-semibold capitalize">
+                          {result.type === 'self-reflection' 
+                            ? `${result.agent}'s Self-Reflection Analysis` 
+                            : `${result.type} Analysis`}
+                        </h3>
                         <div className="text-sm whitespace-pre-wrap">{result.analysis}</div>
                         {result.compatibilityScore !== undefined && (
                           <p className="text-sm">
@@ -265,7 +269,7 @@ export default function SimulationModePage() {
                         )}
                         {result.satisfactionScore !== undefined && (
                           <p className="text-sm">
-                            Satisfaction Score: {result.satisfactionScore}/10
+                            Satisfaction Score: {result.satisfactionScore}/100
                           </p>
                         )}
                         {result.lengthFeedback && (
@@ -273,14 +277,36 @@ export default function SimulationModePage() {
                             Length Feedback: {result.lengthFeedback}
                           </p>
                         )}
-                        {result.attributeImportance && (
+                        {result.attributeRatings && (
                           <div className="text-sm">
-                            <p className="font-medium">Attribute Importance:</p>
+                            <p className="font-medium">Attribute Ratings:</p>
                             <ul className="list-disc list-inside">
-                              {Object.entries(result.attributeImportance).map(([attr, score]) => (
+                              {Object.entries(result.attributeRatings).map(([attr, score]: [string, number]) => (
                                 <li key={attr}>
-                                  {attr}: {score} points
+                                  {attr}: {score}/100
                                 </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {result.attributeSimilarity && (
+                          <div className="text-sm">
+                            <p className="font-medium">Attribute Similarity:</p>
+                            <ul className="list-disc list-inside">
+                              {Object.entries(result.attributeSimilarity).map(([attr, score]: [string, number]) => (
+                                <li key={attr}>
+                                  {attr}: {score}/100
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {result.keyFactors && (
+                          <div className="text-sm">
+                            <p className="font-medium">Key Factors:</p>
+                            <ul className="list-disc list-inside">
+                              {result.keyFactors.map((factor: string, i: number) => (
+                                <li key={i}>{factor}</li>
                               ))}
                             </ul>
                           </div>
