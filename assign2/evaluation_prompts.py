@@ -14,6 +14,7 @@ SELF_REFLECTION_FORMAT = """{
         "Ambition": "Score 0-100 on how ambitious they seemed",
         "SharedInterests": "Score 0-100 on level of shared interests"
     },
+    "decision": "Answer 'yes' or 'no': Would you want to see this person again?",
     "analysis": "Brief analysis of the interaction and compatibility"
 }"""
 
@@ -28,6 +29,7 @@ TRANSCRIPT_ANALYSIS_FORMAT = """{
         "Ambition": "Score 0-100 on similarity in ambition levels",
         "SharedInterests": "Score 0-100 on overlap in interests"
     },
+    "decision": "Answer 'yes' or 'no': Should these two people see each other again?",
     "keyFactors": "List of 3-5 key factors affecting compatibility"
 }"""
 
@@ -42,6 +44,7 @@ PROFILE_ANALYSIS_FORMAT = """{
         "Ambition": "Score 0-100 on alignment in ambition/goals",
         "SharedInterests": "Score 0-100 on overlap in interests/hobbies"
     },
+    "decision": "Answer 'yes' or 'no': Should these two people see each other again?",
     "keyFactors": "List of 3-5 key factors affecting compatibility"
 }"""
 

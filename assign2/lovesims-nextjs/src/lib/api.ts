@@ -56,6 +56,7 @@ export interface EvaluationResult {
   attributeRatings?: AttributeScores;
   attributeSimilarity?: AttributeScores;
   keyFactors?: string[];
+  decision: string;
 }
 
 export async function runEvaluation(data: {

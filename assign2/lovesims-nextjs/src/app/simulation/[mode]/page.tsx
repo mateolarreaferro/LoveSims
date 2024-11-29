@@ -261,7 +261,22 @@ export default function SimulationModePage() {
                             ? `${result.agent}'s Self-Reflection Analysis` 
                             : `${result.type} Analysis`}
                         </h3>
-                        <div className="text-sm whitespace-pre-wrap">{result.analysis}</div>
+                        {result.analysis && (
+                          <div className="text-sm mt-2">
+                            <p className="font-medium">Analysis:</p>
+                            <p>{result.analysis}</p>
+                          </div>
+                        )}
+                        {result.decision && (
+                          <div className="text-sm mt-2">
+                            <p className="font-medium">Decision:</p>
+                            <p className={`font-semibold ${result.decision.toLowerCase() === 'yes' ? 'text-green-600' : 'text-red-600'}`}>
+                              {result.type === 'self-reflection' ? 
+                                `Would ${result.agent} see them again? ${result.decision}` :
+                                `Should they see each other again? ${result.decision}`}
+                            </p>
+                          </div>
+                        )}
                         {result.compatibilityScore !== undefined && (
                           <p className="text-sm">
                             Compatibility Score: {result.compatibilityScore}/100
