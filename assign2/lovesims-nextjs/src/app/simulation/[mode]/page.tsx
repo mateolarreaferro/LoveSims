@@ -7,9 +7,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { ChatWindow } from '@/components/chat-window';
+import { EvaluationOptions } from '@/components/evaluation-options';
 import { agentList } from '@/lib/constants';
 import { useState, useEffect } from 'react';
-import { startDates, createEventSource, runDates, resetGame } from '@/lib/api';
+import { startDates, createEventSource, runDates, resetGame, runEvaluation, type EvaluationType, type EvaluationResult } from '@/lib/api';
 import { useParams } from 'next/navigation';
 
 const DURATION_OPTIONS = [
@@ -22,10 +23,13 @@ export default function SimulationModePage() {
   const params = useParams();
   const mode = params.mode as string;
   const [selectedAgents, setSelectedAgents] = useState<string[]>([]);
-  const [dateContext, setDateContext] = useState('');
+  const [dateContext, setDateContext] = useState('coffee chat');
   const [duration, setDuration] = useState('10');
   const [messages, setMessages] = useState<any[]>([]);
   const [isRunning, setIsRunning] = useState(false);
+  const [simulationComplete, setSimulationComplete] = useState(false);
+  const [evaluationResults, setEvaluationResults] = useState<EvaluationResult[]>([]);
+  const [isEvaluating, setIsEvaluating] = useState(false);
 
   const modeTitles = {
     'one-to-one': 'One-to-One Simulation',
@@ -44,6 +48,8 @@ export default function SimulationModePage() {
     try {
       setMessages([]);
       setIsRunning(true);
+      setSimulationComplete(false);
+      setEvaluationResults([]);
 
       // Initialize the simulation
       await startDates({
@@ -74,11 +80,29 @@ export default function SimulationModePage() {
         setTimeout(() => {
           eventSource.close();
           setIsRunning(false);
+          setSimulationComplete(true);
         }, 1000);
       }
     } catch (error) {
       console.error('Error running simulation:', error);
       setIsRunning(false);
+    }
+  };
+
+  const handleEvaluation = async (type: EvaluationType) => {
+    try {
+      setIsEvaluating(true);
+      const results = await runEvaluation({
+        type,
+        mode,
+        agents: selectedAgents,
+        transcript: messages,
+      });
+      setEvaluationResults(results);
+    } catch (error) {
+      console.error('Error running evaluation:', error);
+    } finally {
+      setIsEvaluating(false);
     }
   };
 
@@ -94,6 +118,7 @@ export default function SimulationModePage() {
           <h1 className="text-3xl font-bold tracking-tight">{modeTitles[mode as keyof typeof modeTitles]}</h1>
         </div>
 
+        {/* Main simulation section */}
         <div className="grid gap-6 md:grid-cols-[350px_1fr]">
           <Card>
             <CardHeader>
@@ -213,6 +238,61 @@ export default function SimulationModePage() {
 
           <ChatWindow messages={messages} />
         </div>
+
+        {/* Evaluation section - now full width at bottom */}
+        {simulationComplete && (
+          <div className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-[350px_1fr]">
+              <EvaluationOptions
+                mode={mode}
+                onSelect={handleEvaluation}
+                disabled={isEvaluating}
+              />
+              {evaluationResults.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Evaluation Results</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {evaluationResults.map((result, index) => (
+                      <div key={index} className="space-y-2">
+                        <h3 className="font-semibold capitalize">{result.type} Analysis</h3>
+                        <div className="text-sm whitespace-pre-wrap">{result.analysis}</div>
+                        {result.compatibilityScore !== undefined && (
+                          <p className="text-sm">
+                            Compatibility Score: {result.compatibilityScore}/100
+                          </p>
+                        )}
+                        {result.satisfactionScore !== undefined && (
+                          <p className="text-sm">
+                            Satisfaction Score: {result.satisfactionScore}/10
+                          </p>
+                        )}
+                        {result.lengthFeedback && (
+                          <p className="text-sm">
+                            Length Feedback: {result.lengthFeedback}
+                          </p>
+                        )}
+                        {result.attributeImportance && (
+                          <div className="text-sm">
+                            <p className="font-medium">Attribute Importance:</p>
+                            <ul className="list-disc list-inside">
+                              {Object.entries(result.attributeImportance).map(([attr, score]) => (
+                                <li key={attr}>
+                                  {attr}: {score} points
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );

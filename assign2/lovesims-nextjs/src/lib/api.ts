@@ -33,3 +33,30 @@ export async function resetGame() {
   });
   return response.json();
 }
+
+export type EvaluationType = 'self-reflection' | 'transcript-based' | 'profiles-based' | 'all';
+
+export interface EvaluationResult {
+  type: EvaluationType;
+  analysis: string;
+  compatibilityScore?: number;
+  satisfactionScore?: number;
+  lengthFeedback?: string;
+  attributeImportance?: Record<string, number>;
+}
+
+export async function runEvaluation(data: {
+  type: EvaluationType;
+  mode: string;
+  agents: string[];
+  transcript: any[];
+}) {
+  const response = await fetch(`${API_BASE_URL}/evaluate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+  return response.json() as Promise<EvaluationResult[]>;
+}

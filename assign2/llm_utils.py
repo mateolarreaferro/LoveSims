@@ -160,3 +160,46 @@ def mod_gen(modules: List[Dict], placeholders: Dict, target_keys = None) -> Dict
     target_keys = [module["name"].lower() for module in modules if "name" in module]
   parsed = parse_json(response, target_keys)
   return parsed
+
+def json_gen_oai(prompt, response_format, model='gpt-4o', temperature=1):
+    """Generate a response in JSON format using OpenAI.
+    
+    Args:
+        prompt (str): The prompt to send to the model
+        response_format (dict): The expected JSON structure with example values
+        model (str): The model to use
+        temperature (float): Sampling temperature
+        
+    Returns:
+        dict: The parsed JSON response
+    """
+    messages = [
+        {"role": "system", "content": "You are a helpful assistant that always responds in the exact JSON format specified."},
+        {"role": "user", "content": f"""
+Please provide a response in the following JSON format:
+{json.dumps(response_format, indent=2)}
+
+Here is the task:
+{prompt}
+
+Remember to:
+1. Follow the exact JSON structure shown above
+2. Include all required fields
+3. Use appropriate data types (numbers for scores, strings for text)
+4. Ensure the response is valid JSON
+"""}
+    ]
+    
+    try:
+        response = oai.chat.completions.create(
+            model=model,
+            temperature=temperature,
+            messages=messages,
+            response_format={ "type": "json_object" },
+            max_tokens=1000
+        )
+        content = response.choices[0].message.content
+        return json.loads(content)
+    except Exception as e:
+        print(f"Error generating JSON completion: {e}")
+        raise e

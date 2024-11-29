@@ -236,5 +236,139 @@ def get_agent_details(display_name):
     except Exception as e:
         return jsonify({"error": f"Error loading agent details: {str(e)}"})
 
+@app.route('/evaluate', methods=['POST'])
+def evaluate():
+    data = request.json
+    eval_type = data.get('type')
+    mode = data.get('mode')
+    agents = data.get('agents')
+    transcript = data.get('transcript')
+    
+    results = []
+    
+    def get_agent_profile(agent_name):
+        # Get the absolute path to the project root
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        
+        # Construct paths relative to project root
+        pseudonyms_path = os.path.join(project_root, 'AgentBank', 'raw_data', 'id_to_pseudonyms.txt')
+        
+        with open(pseudonyms_path, 'r') as f:
+            id_map = dict(line.strip().split(',') for line in f)
+        
+        # Find the file_id that matches the agent name
+        file_id = next((k for k, v in id_map.items() if agent_name == v), None)
+        if not file_id:
+            raise ValueError(f"Agent {agent_name} not found in pseudonyms file")
+            
+        profile_path = os.path.join(project_root, 'AgentBank', 'raw_data', file_id)
+        with open(profile_path, 'r') as f:
+            profile = f.read()
+            
+        memory_path = os.path.join(project_root, 'AgentBank', 'memories', f'{agent_name}.py')
+        if os.path.exists(memory_path):
+            with open(memory_path, 'r') as f:
+                memories = parse_memory_file(f.read())
+        else:
+            memories = []
+            
+        return {'profile': profile, 'memories': memories}
+    
+    if eval_type in ['self-reflection', 'all'] and mode in ['one-to-one', 'one-to-all']:
+        # Self-reflection evaluation with JSON format
+        agent_profile = get_agent_profile(agents[0])
+        reflection_prompt = f"""You are {agents[0]}. Based on your profile:
+{agent_profile['profile']}
+
+And your memories:
+{agent_profile['memories']}
+
+You just had a conversation in the context: {game.date_context if game else ''}
+
+Here's the transcript:
+{transcript}
+
+Please reflect on this interaction by answering these questions."""
+
+        reflection_format = {
+            "satisfactionScore": 8,  # Example: 1-10 rating
+            "lengthFeedback": "Just right",  # Example: "Too little", "Too much", or "Just right"
+            "attributeImportance": {
+                "Attractiveness": 20,  # Example points distribution
+                "Sincerity": 20,
+                "Intelligence": 15,
+                "Fun": 15,
+                "Ambition": 15,
+                "SharedInterests": 15
+            },
+            "analysis": "Brief analysis of the interaction and compatibility..."  # Example analysis text
+        }
+        
+        reflection = json_gen_oai(reflection_prompt, reflection_format)
+        results.append({
+            'type': 'self-reflection',
+            **reflection
+        })
+    
+    if eval_type in ['transcript-based', 'all']:
+        # Third-party transcript-based evaluation with JSON format
+        transcript_prompt = f"""As a neutral third-party evaluator, analyze this conversation between {' and '.join(agents)}:
+
+Context: {game.date_context if game else ''}
+
+Transcript:
+{transcript}
+
+Please analyze their interaction and compatibility."""
+
+        transcript_format = {
+            "analysis": "Detailed analysis of the interaction...",  # Example analysis text
+            "compatibilityScore": 85,  # Example: 0-100 score
+            "keyFactors": [  # Example factors
+                "Strong shared interests",
+                "Similar communication styles",
+                "Compatible values"
+            ]
+        }
+        
+        evaluation = json_gen_oai(transcript_prompt, transcript_format)
+        results.append({
+            'type': 'transcript-based',
+            **evaluation
+        })
+    
+    if eval_type in ['profiles-based', 'all']:
+        # Third-party profile-based evaluation with JSON format
+        profiles = [get_agent_profile(agent) for agent in agents]
+        profiles_prompt = f"""As a neutral third-party matchmaker, analyze the compatibility between these individuals based on their profiles and memories:
+
+Person 1 ({agents[0]}):
+Profile: {profiles[0]['profile']}
+Memories: {profiles[0]['memories']}
+
+Person 2 ({agents[1]}):
+Profile: {profiles[1]['profile']}
+Memories: {profiles[1]['memories']}
+
+Please analyze their potential compatibility."""
+
+        profiles_format = {
+            "analysis": "Detailed analysis of potential compatibility...",  # Example analysis text
+            "compatibilityScore": 75,  # Example: 0-100 score
+            "keyFactors": [  # Example factors
+                "Complementary personalities",
+                "Similar background",
+                "Shared values"
+            ]
+        }
+        
+        evaluation = json_gen_oai(profiles_prompt, profiles_format)
+        results.append({
+            'type': 'profiles-based',
+            **evaluation
+        })
+    
+    return jsonify(results)
+
 if __name__ == "__main__":
     app.run(debug=True)
