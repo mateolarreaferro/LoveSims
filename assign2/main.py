@@ -53,11 +53,14 @@ class Game:
 
     def run_dates(self):
         for agent1_name, agent2_name in self.current_pairs:
+            # Reset conversation history for each new pair
+            self.date_transcript = []
+            
             agent1 = Agent(agent1_name, next(a["persona"] for a in agent_list if a["name"] == agent1_name))
             agent2 = Agent(agent2_name, next(a["persona"] for a in agent_list if a["name"] == agent2_name))
             
             # Log the start of the date
-            date_start = f"Date between {agent1_name} and {agent2_name}:"
+            date_start = f"\nDate between {agent1_name} and {agent2_name}:"
             response_data = {"agent": "System", "response": date_start, "number": 0}
             if not hasattr(stream, 'queue'):
                 stream.queue = []

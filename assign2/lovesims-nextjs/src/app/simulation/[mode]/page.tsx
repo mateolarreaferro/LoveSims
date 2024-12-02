@@ -24,7 +24,7 @@ export default function SimulationModePage() {
   const mode = params.mode as string;
   const [selectedAgents, setSelectedAgents] = useState<string[]>([]);
   const [dateContext, setDateContext] = useState('coffee chat');
-  const [duration, setDuration] = useState('16');
+  const [duration, setDuration] = useState('6');
   const [messages, setMessages] = useState<any[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [simulationComplete, setSimulationComplete] = useState(false);
