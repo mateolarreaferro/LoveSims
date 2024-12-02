@@ -1,0 +1,8 @@
+# Date context
+date_context = 'you are on your first date at stanfords tree house during the last day of the fall quarter'
+
+# Date duration
+date_duration = 10
+
+# Evaluation type
+eval_type = 'self-reflection'
