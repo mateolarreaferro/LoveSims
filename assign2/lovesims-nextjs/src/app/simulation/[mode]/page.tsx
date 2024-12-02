@@ -37,8 +37,9 @@ export default function SimulationModePage() {
     'all-pairs': 'All Pairs Simulation',
   };
 
+  const showEvaluation = mode === 'one-to-one';
+
   useEffect(() => {
-    // Reset game when component unmounts
     return () => {
       resetGame();
     };
@@ -240,7 +241,7 @@ export default function SimulationModePage() {
         </div>
 
         {/* Evaluation section - now full width at bottom */}
-        {simulationComplete && (
+        {simulationComplete && showEvaluation && (
           <div className="space-y-6">
             <div className="grid gap-6 md:grid-cols-[350px_1fr]">
               <EvaluationOptions
