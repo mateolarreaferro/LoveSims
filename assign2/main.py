@@ -103,8 +103,23 @@ class Game:
         return response.strip()
 
     def _create_date_prompt(self, agent, other_agent, stage):
+        # Get agent memories
+        memory_file = os.path.join('..', 'AgentBank', 'memories', f'{agent.name}.py')
+        memories = []
+        if os.path.exists(memory_file):
+            with open(memory_file, 'r') as f:
+                content = f.read()
+                memories = parse_memory_file(content)
+        
+        memories_str = "\n".join([f"- {memory}" for memory in memories])
+        
         return f"""
-        You are {agent.name}, {agent.persona}. You are on a date with {other_agent.name}.
+        You are {agent.name}, {agent.persona}
+
+        Your memories and experiences:
+        {memories_str}
+
+        You are on a date with {other_agent.name}.
         The date should follow this structure: start with a greeting, then progress from light to deeper conversation topics, and end with a goodbye.
         You are currently in the {stage} stage of the date.
         Respond in character as {agent.name}, with short, conversational responses appropriate for the current stage of the date.
